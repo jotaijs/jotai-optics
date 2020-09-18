@@ -33,7 +33,7 @@
     "singleQuote": true,
     "trailingComma": "all"
   },
-  "name": "store-dolla",
+  "name": "jotai-optics",
   "author": "merisbahti",
   "module": "dist/store-dolla.esm.js",
   "devDependencies": {
