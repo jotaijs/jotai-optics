@@ -35,7 +35,7 @@
   },
   "name": "jotai-optics",
   "author": "merisbahti",
-  "module": "dist/store-dolla.esm.js",
+  "module": "dist/jotai-optics.esm.js",
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@storybook/addon-actions": "^6.0.21",
