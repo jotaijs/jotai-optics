@@ -4,29 +4,50 @@ import * as O from 'optics-ts'
 
 export function focus<S, A>(
   atom: jotai.WritableAtom<S, SetStateAction<S>>,
+  callback: (optic: O.OpticFor<S>) => O.Prism<S, any, A>,
+): jotai.WritableAtom<A | undefined, SetStateAction<A>>
+
+export function focus<S, A>(
+  atom: jotai.WritableAtom<S, SetStateAction<S>>,
   callback: (
     optic: O.OpticFor<S>,
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>,
-): jotai.WritableAtom<A, SetStateAction<A>> {
+): jotai.WritableAtom<A, SetStateAction<A>>
+
+export function focus<S, A>(
+  atom: jotai.WritableAtom<S, SetStateAction<S>>,
+  callback: (
+    optic: O.OpticFor<S>,
+  ) =>
+    | O.Lens<S, any, A>
+    | O.Equivalence<S, any, A>
+    | O.Iso<S, any, A>
+    | O.Prism<S, any, A>,
+): any {
   const focus = callback(O.optic<S>())
   return jotai.atom(
     atomGetter => {
-      const value = O.get(focus)(
-        atomGetter(atom),
-        // How do i remove this typecast?
-      ) as NonPromise<A>
-      return value
+      if (focus._tag === 'Prism') {
+        const value = O.preview(focus)(atomGetter(atom)) as
+          | NonPromise<A>
+          | undefined
+        return value as any
+      } else {
+        const value = O.get(focus)(
+          atomGetter(atom),
+          // How do i remove this typecast?
+        ) as NonPromise<A>
+        return value
+      }
     },
     (_, set, update) => {
       set(atom, param => {
-        const currentValue = O.get(focus)(param)
-        const updatedValue =
-          update instanceof Function ? update(currentValue) : update
-        const updatedSuperValue = O.set(focus)(updatedValue)(
-          param,
-          // This typecast is bad too
-        ) as NonFunction<S>
-        return updatedSuperValue
+        if (typeof update === 'function') {
+          const typeCastedUpdater = update as (param: A) => A
+          return O.modify(focus)(typeCastedUpdater)(param) as NonFunction<S>
+        } else {
+          return O.set(focus)(update)(param) as NonFunction<S>
+        }
       })
     },
   )
