@@ -3,6 +3,8 @@ import React from 'react'
 import * as rtl from '@testing-library/react'
 import { focus } from '../src/index'
 
+const succ = (input: number) => input + 1
+
 it('focus on an atom works', async () => {
   const bigAtom = atom({ a: 0 })
   const aAtom = focus(bigAtom, optic => optic.prop('a'))
@@ -14,7 +16,7 @@ it('focus on an atom works', async () => {
       <>
         <div>bigAtom: {JSON.stringify(bigAtomValue)}</div>
         <div>count: {count}</div>
-        <button onClick={() => setCount(c => c + 1)}>button</button>
+        <button onClick={() => setCount(succ)}>button</button>
       </>
     )
   }

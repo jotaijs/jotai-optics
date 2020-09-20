@@ -4,7 +4,7 @@ import * as rtl from '@testing-library/react'
 import { focus } from '../src/index'
 
 it('updates prisms', async () => {
-  const bigAtom = atom<{ a: number | undefined }>({ a: 5 })
+  const bigAtom = atom<{ a?: number }>({ a: 5 })
   const aAtom = focus(bigAtom, optic => optic.prop('a').optional())
 
   const Counter: React.FC = () => {
