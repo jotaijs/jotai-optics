@@ -8,7 +8,7 @@ The answer is *optics*.
 This is based on this issue:
 https://github.com/pmndrs/jotai/issues/44
 
-We've got Prisms, Lenses, Isos and of course Equivalences.
+We've got Prisms, Lenses, Isos, Traversals and of course Equivalences.
 
 ## Usage
 ```

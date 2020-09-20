@@ -9,6 +9,11 @@ export function focus<S, A>(
 
 export function focus<S, A>(
   atom: jotai.WritableAtom<S, SetStateAction<S>>,
+  callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>,
+): jotai.WritableAtom<Array<A>, SetStateAction<A>>
+
+export function focus<S, A>(
+  atom: jotai.WritableAtom<S, SetStateAction<S>>,
   callback: (
     optic: O.OpticFor<S>,
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>,
@@ -22,12 +27,16 @@ export function focus<S, A>(
     | O.Lens<S, any, A>
     | O.Equivalence<S, any, A>
     | O.Iso<S, any, A>
-    | O.Prism<S, any, A>,
+    | O.Prism<S, any, A>
+    | O.Traversal<S, any, A>,
 ): any {
   const focus = callback(O.optic<S>())
   return jotai.atom(
     atomGetter => {
-      if (focus._tag === 'Prism') {
+      if (focus._tag === 'Traversal') {
+        const values = O.collect(focus)(atomGetter(atom)) as NonPromise<A[]>
+        return values
+      } else if (focus._tag === 'Prism') {
         const value = O.preview(focus)(atomGetter(atom)) as
           | NonPromise<A>
           | undefined
