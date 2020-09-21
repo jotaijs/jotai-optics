@@ -61,3 +61,14 @@ export function focus<S, A>(
     },
   )
 }
+
+export type RWAtom<T> = jotai.WritableAtom<T, SetStateAction<T>>
+
+export const useAtomArrayFamily = <Element extends any>(
+  atom: RWAtom<Array<Element>>,
+): Array<RWAtom<Element>> => {
+  const keysAtom = jotai.atom(get => get(atom).map((_, index) => index))
+  const [elements] = jotai.useAtom(keysAtom)
+  const atoms = elements.map(key => focus(atom, optic => optic.prop(key)))
+  return atoms
+}
