@@ -69,6 +69,7 @@ export const useAtomArrayFamily = <Element extends any>(
 
     return atomFamily<number, Element, SetStateAction<Element>>(
       param => get => {
+        // Kindly coercing this from `Element | undefined` to `Element`
         return O.preview(optic(param))(get(atom)) as Element
       },
       param => (_, set, update) => {
@@ -91,7 +92,6 @@ export const useAtomArrayFamily = <Element extends any>(
     [atom],
   )
   const [elements] = jotai.useAtom(keysAtom)
-  // Kindly coercing this from `Element | undefined` to `Element`
   const atoms: Array<RWAtom<Element>> = React.useMemo(
     () => elements.map(key => atomFamilyGetter(key)),
     [elements, atomFamilyGetter],
