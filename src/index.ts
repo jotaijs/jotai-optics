@@ -1,6 +1,8 @@
+import { atomFamily } from './atomfamily-copy-no-cjs-exported'
 import * as jotai from 'jotai'
-import { NonPromise, SetStateAction, NonFunction } from 'jotai/types'
+import { SetStateAction } from 'jotai/types'
 import * as O from 'optics-ts'
+import React from 'react'
 
 export function focus<S, A>(
   atom: jotai.WritableAtom<S, SetStateAction<S>>,
@@ -34,28 +36,23 @@ export function focus<S, A>(
   return jotai.atom(
     atomGetter => {
       if (focus._tag === 'Traversal') {
-        const values = O.collect(focus)(atomGetter(atom)) as NonPromise<A[]>
+        const values = O.collect(focus)(atomGetter(atom))
         return values
       } else if (focus._tag === 'Prism') {
-        const value = O.preview(focus)(atomGetter(atom)) as
-          | NonPromise<A>
-          | undefined
-        return value as any
+        const value = O.preview(focus)(atomGetter(atom))
+        return value
       } else {
-        const value = O.get(focus)(
-          atomGetter(atom),
-          // How do i remove this typecast?
-        ) as NonPromise<A>
+        const value = O.get(focus)(atomGetter(atom))
         return value
       }
     },
     (_, set, update) => {
-      set(atom, param => {
-        if (typeof update === 'function') {
-          const typeCastedUpdater = update as (param: A) => A
-          return O.modify(focus)(typeCastedUpdater)(param) as NonFunction<S>
+      set(atom, superState => {
+        if (update instanceof Function) {
+          const typeCastedUpdater = update as (a: A) => A
+          return O.modify(focus)(typeCastedUpdater)(superState)
         } else {
-          return O.set(focus)(update)(param) as NonFunction<S>
+          return O.set(focus)(update)(superState)
         }
       })
     },
@@ -67,8 +64,37 @@ export type RWAtom<T> = jotai.WritableAtom<T, SetStateAction<T>>
 export const useAtomArrayFamily = <Element extends any>(
   atom: RWAtom<Array<Element>>,
 ): Array<RWAtom<Element>> => {
-  const keysAtom = jotai.atom(get => get(atom).map((_, index) => index))
+  const atomFamilyGetter = React.useMemo(() => {
+    const optic = (i: number) => O.optic<Array<Element>>().index(i)
+
+    return atomFamily<number, Element, SetStateAction<Element>>(
+      param => get => {
+        return O.preview(optic(param))(get(atom)) as Element
+      },
+      param => (_, set, update) => {
+        set(atom, superState => {
+          if (update instanceof Function) {
+            const typeCastedUpdater = update
+            return O.modify(optic(param))(typeCastedUpdater)(superState)
+          } else {
+            return O.set(optic(param))(update)(superState)
+          }
+        })
+      },
+    )
+  }, [atom])
+  const keysAtom = React.useMemo(
+    () =>
+      jotai.atom(get => {
+        return get(atom).map((_, index) => index)
+      }),
+    [atom],
+  )
   const [elements] = jotai.useAtom(keysAtom)
-  const atoms = elements.map(key => focus(atom, optic => optic.prop(key)))
+  // Kindly coercing this from `Element | undefined` to `Element`
+  const atoms: Array<RWAtom<Element>> = React.useMemo(
+    () => elements.map(key => atomFamilyGetter(key)),
+    [elements, atomFamilyGetter],
+  ) as Array<RWAtom<Element>>
   return atoms
 }

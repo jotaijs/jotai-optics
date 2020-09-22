@@ -4,7 +4,16 @@ import * as rtl from '@testing-library/react'
 import { RWAtom, useAtomArrayFamily } from '../src/index'
 
 type TodoItem = { task: string; checked?: boolean }
-it('creating an atom family from an atom of array of items', async () => {
+
+const useUpdateCount = () => {
+  const count = React.useRef(0)
+  React.useEffect(() => {
+    count.current += 1
+  })
+  return count.current
+}
+
+it('no unneccesary updates when updating atoms', async () => {
   const todosAtom = atom<Array<TodoItem>>([
     { task: 'get cat food' },
     { task: 'get dragon food' },
@@ -21,16 +30,14 @@ it('creating an atom family from an atom of array of items', async () => {
     )
   }
 
-  const TaskItem = ({ atom }: { atom: RWAtom<TodoItem> }) => {
+  const TaskItem = React.memo(({ atom }: { atom: RWAtom<TodoItem> }) => {
     const [value, onChange] = useAtom(atom)
-    const toggle = () => {
-      onChange(value => {
-        return { ...value, checked: !value.checked }
-      })
-    }
+    const toggle = () =>
+      onChange(value => ({ ...value, checked: !value.checked }))
+    const updates = useUpdateCount()
     return (
-      <li data-testid={value.task}>
-        {value.task}
+      <li>
+        {value.task} {updates}
         <input
           data-testid={`${value.task}-checkbox`}
           type="checkbox"
@@ -39,16 +46,16 @@ it('creating an atom family from an atom of array of items', async () => {
         />
       </li>
     )
-  }
+  })
 
-  const { findByTestId } = rtl.render(
+  const { findByTestId, findByText } = rtl.render(
     <Provider>
       <TaskList />
     </Provider>,
   )
 
-  await findByTestId('get cat food')
-  await findByTestId('get dragon food')
+  await findByText('get cat food 0')
+  await findByText('get dragon food 0')
 
   const catBox = (await findByTestId(
     'get cat food-checkbox',
@@ -62,10 +69,16 @@ it('creating an atom family from an atom of array of items', async () => {
 
   rtl.fireEvent.click(catBox)
 
+  await findByText('get cat food 1')
+  await findByText('get dragon food 0')
+
   expect(catBox.checked).toBe(true)
   expect(dragonBox.checked).toBe(false)
 
   rtl.fireEvent.click(dragonBox)
+
+  await findByText('get cat food 1')
+  await findByText('get dragon food 1')
 
   expect(catBox.checked).toBe(true)
   expect(dragonBox.checked).toBe(true)
