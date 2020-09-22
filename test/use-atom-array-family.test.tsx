@@ -10,12 +10,12 @@ it('creating an atom family from an atom of array of items', async () => {
     { task: 'get dragon food' },
   ])
 
-  const TaskList = () => {
-    const atoms = useAtomArrayFamily(todosAtom)
+  const TaskList = ({ todoItems }: { todoItems: RWAtom<Array<TodoItem>> }) => {
+    const atoms = useAtomArrayFamily(todoItems)
     return (
       <>
-        {atoms.map((atom, index) => (
-          <TaskItem key={index} atom={atom} />
+        {atoms.map((todoItem, index) => (
+          <TaskItem key={index} atom={todoItem} />
         ))}
       </>
     )
@@ -43,7 +43,7 @@ it('creating an atom family from an atom of array of items', async () => {
 
   const { findByTestId } = rtl.render(
     <Provider>
-      <TaskList />
+      <TaskList todoItems={todosAtom} />
     </Provider>,
   )
 
