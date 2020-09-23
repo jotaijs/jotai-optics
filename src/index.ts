@@ -1,4 +1,4 @@
-import { atomFamily } from 'jotai/utils.cjs.js'
+import { atomFamily } from 'jotai/utils.cjs'
 import * as jotai from 'jotai'
 import { SetStateAction } from 'jotai/types'
 import * as O from 'optics-ts'
@@ -87,13 +87,13 @@ export const useAtomArrayFamily = <Element extends any>(
   const keysAtom = React.useMemo(
     () =>
       jotai.atom(get => {
-        return get(atom).map((_, index) => index)
+        return get(atom).length
       }),
     [atom],
   )
   const [elements] = jotai.useAtom(keysAtom)
   const atoms: Array<RWAtom<Element>> = React.useMemo(
-    () => elements.map(key => atomFamilyGetter(key)),
+    () => [...new Array(elements)].map((_, key) => atomFamilyGetter(key)),
     [elements, atomFamilyGetter],
   ) as Array<RWAtom<Element>>
   return atoms
