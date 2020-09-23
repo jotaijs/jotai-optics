@@ -1,4 +1,4 @@
-import { atomFamily } from './atomfamily-copy-no-cjs-exported'
+import { atomFamily } from 'jotai/utils.cjs.js'
 import * as jotai from 'jotai'
 import { SetStateAction } from 'jotai/types'
 import * as O from 'optics-ts'
