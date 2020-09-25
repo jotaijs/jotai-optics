@@ -14,7 +14,7 @@ it('creating an atom family from an atom of array of items', async () => {
     const atoms = useAtomArrayFamily(todoItems)
     return (
       <>
-        {atoms.map((todoItem, index) => (
+        {atoms.map(([todoItem, _], index) => (
           <TaskItem key={index} atom={todoItem} />
         ))}
       </>

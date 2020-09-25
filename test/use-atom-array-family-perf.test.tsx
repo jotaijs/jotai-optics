@@ -23,7 +23,7 @@ it('no unneccesary updates when updating atoms', async () => {
     const atoms = useAtomArrayFamily(todosAtom)
     return (
       <>
-        {atoms.map((atom, index) => (
+        {atoms.map(([atom], index) => (
           <TaskItem key={index} atom={atom} />
         ))}
       </>

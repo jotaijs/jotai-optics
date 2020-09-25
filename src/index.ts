@@ -33,7 +33,7 @@ export function focus<S, A>(
     | O.Traversal<S, any, A>,
 ): any {
   const focus = callback(O.optic<S>())
-  return jotai.atom(
+  return jotai.atom<A, SetStateAction<A>>(
     atomGetter => {
       if (focus._tag === 'Traversal') {
         const values = O.collect(focus)(atomGetter(atom))
@@ -49,8 +49,7 @@ export function focus<S, A>(
     (_, set, update) => {
       set(atom, superState => {
         if (update instanceof Function) {
-          const typeCastedUpdater = update as (a: A) => A
-          return O.modify(focus)(typeCastedUpdater)(superState)
+          return O.modify(focus)(update)(superState)
         } else {
           return O.set(focus)(update)(superState)
         }
@@ -63,10 +62,13 @@ export type RWAtom<T> = jotai.WritableAtom<T, SetStateAction<T>>
 
 export const useAtomArrayFamily = <Element extends any>(
   atom: RWAtom<Array<Element>>,
-): Array<RWAtom<Element>> => {
-  const atomFamilyGetter = React.useMemo(() => {
-    const optic = (i: number) => O.optic<Array<Element>>().index(i)
+) => {
+  const optic = React.useCallback(
+    (i: number) => O.optic<Array<Element>>().index(i),
+    [],
+  )
 
+  const atomFamilyGetter = React.useMemo(() => {
     return atomFamily<number, Element, SetStateAction<Element>>(
       param => get => {
         // Kindly coercing this from `Element | undefined` to `Element`
@@ -75,15 +77,15 @@ export const useAtomArrayFamily = <Element extends any>(
       param => (_, set, update) => {
         set(atom, superState => {
           if (update instanceof Function) {
-            const typeCastedUpdater = update
-            return O.modify(optic(param))(typeCastedUpdater)(superState)
+            return O.modify(optic(param))(update)(superState)
           } else {
             return O.set(optic(param))(update)(superState)
           }
         })
       },
     )
-  }, [atom])
+  }, [atom, optic])
+
   const keysAtom = React.useMemo(
     () =>
       jotai.atom(get => {
@@ -91,10 +93,25 @@ export const useAtomArrayFamily = <Element extends any>(
       }),
     [atom],
   )
+
+  const removeItemAtom = jotai.atom<undefined, number>(
+    undefined,
+    (get, set, arg): void => {
+      const currState = get(atom)
+      const newState = O.remove(optic(arg))(currState)
+      set(atom, newState)
+    },
+  )
+
+  const [, removeItem] = jotai.useAtom(removeItemAtom)
+
   const [elements] = jotai.useAtom(keysAtom)
-  const atoms: Array<RWAtom<Element>> = React.useMemo(
-    () => [...new Array(elements)].map((_, key) => atomFamilyGetter(key)),
-    [elements, atomFamilyGetter],
-  ) as Array<RWAtom<Element>>
+  const atoms = React.useMemo(
+    () =>
+      [...new Array(elements)].map(
+        (_, key) => [atomFamilyGetter(key), () => removeItem(key)] as const,
+      ),
+    [elements, atomFamilyGetter, removeItem],
+  )
   return atoms
 }
