@@ -21,23 +21,30 @@ it('no unneccesary updates when updating atoms', async () => {
 
   const TaskList = () => {
     const atoms = useAtomArrayFamily(todosAtom)
+    const updates = useUpdateCount()
     return (
       <>
-        {atoms.map(([atom], index) => (
-          <TaskItem key={index} atom={atom} />
+        TaskListUpdates: {updates}
+        {atoms.map(([atom, remove], index) => (
+          <TaskItem key={index} onRemove={remove} atom={atom} />
         ))}
       </>
     )
   }
 
-  const TaskItem = React.memo(({ atom }: { atom: RWAtom<TodoItem> }) => {
+  const TaskItem = ({
+    atom,
+  }: {
+    atom: RWAtom<TodoItem>
+    onRemove: () => void
+  }) => {
     const [value, onChange] = useAtom(atom)
     const toggle = () =>
       onChange(value => ({ ...value, checked: !value.checked }))
     const updates = useUpdateCount()
     return (
       <li>
-        {value.task} {updates}
+        {value.task} updates: {updates}
         <input
           data-testid={`${value.task}-checkbox`}
           type="checkbox"
@@ -46,7 +53,7 @@ it('no unneccesary updates when updating atoms', async () => {
         />
       </li>
     )
-  })
+  }
 
   const { findByTestId, findByText } = rtl.render(
     <Provider>
@@ -54,8 +61,9 @@ it('no unneccesary updates when updating atoms', async () => {
     </Provider>,
   )
 
-  await findByText('get cat food 0')
-  await findByText('get dragon food 0')
+  await findByText('get cat food updates: 0')
+  await findByText('get dragon food updates: 0')
+  await findByText('TaskListUpdates: 0')
 
   const catBox = (await findByTestId(
     'get cat food-checkbox',
@@ -69,16 +77,18 @@ it('no unneccesary updates when updating atoms', async () => {
 
   rtl.fireEvent.click(catBox)
 
-  await findByText('get cat food 1')
-  await findByText('get dragon food 0')
+  await findByText('get cat food updates: 1')
+  await findByText('get dragon food updates: 0')
+  await findByText('TaskListUpdates: 0')
 
   expect(catBox.checked).toBe(true)
   expect(dragonBox.checked).toBe(false)
 
   rtl.fireEvent.click(dragonBox)
 
-  await findByText('get cat food 1')
-  await findByText('get dragon food 1')
+  await findByText('get cat food updates: 1')
+  await findByText('get dragon food updates: 1')
+  await findByText('TaskListUpdates: 0')
 
   expect(catBox.checked).toBe(true)
   expect(dragonBox.checked).toBe(true)
