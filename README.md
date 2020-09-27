@@ -54,7 +54,7 @@ const TaskList = ({ todoItems }: { todoItems: RWAtom<Array<TodoItem>> }) => {
   const atoms = useAtomArrayFamily(todoItems)
   return (
     <>
-      {atoms.map((todoItem, index) => (
+      {atoms.map(([todoItem], index) => (
         <TaskItem key={index} atom={todoItem} />
       ))}
     </>
