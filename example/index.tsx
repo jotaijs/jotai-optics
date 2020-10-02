@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { atom, Provider, useAtom } from 'jotai'
 import { focus, RWAtom, useAtomArrayFamily } from '../src/index'
+import { useUpdateAtom } from 'jotai/utils'
 
 const TodosAtom = atom([
   { task: 'Eat some food', checked: false },
@@ -10,7 +11,7 @@ const TodosAtom = atom([
 
 const TodoList = ({ todos }: { todos: RWAtom<Todos> }) => {
   const atoms = useAtomArrayFamily(todos)
-  const [, changeTodoList] = useAtom(todos)
+  const changeTodoList = useUpdateAtom(todos)
   return (
     <ul>
       {atoms.map(([atom, onRemove]) => (
