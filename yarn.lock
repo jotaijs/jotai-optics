@@ -8020,12 +8020,12 @@ jest@^25.3.0:
     import-local "^3.0.2"
     jest-cli "^25.5.4"
 
-jotai@^0.7.1:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-0.7.1.tgz#b3128fcfc70a22ebeeb7dc93ca0c753d634012a5"
-  integrity sha512-24VdRfBnCrks1t04napgiZzpn8Fz3Gsv/70WMA2yVcrLUEA34rlnOINUXAP2Y803FynVhzIRMrkrj5yO+q0R6Q==
+jotai@^0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-0.10.1.tgz#d3b0bdb8495bd87909cfdc7e5f9ba0dfb74733f0"
+  integrity sha512-3z2OQ4RlZk5s1+SI4Z5DPUILbABCvl+s0mxQfD/5YvEKQfbGghJZ6bwQTlHGB8Hq+eAou7zAoyEX4Z9PZ9oRFw==
   dependencies:
-    use-context-selector "^1.1.4"
+    use-context-selector "1.2.10"
 
 jpjs@^1.2.1:
   version "1.2.1"
@@ -12386,10 +12386,10 @@ use-composed-ref@^1.0.0:
   dependencies:
     ts-essentials "^2.0.3"
 
-use-context-selector@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/use-context-selector/-/use-context-selector-1.1.4.tgz#11c1cc3856a7ea06972a7b1e0402ce86b9a8ed31"
-  integrity sha512-qJ1KFw6G7XUTdyiUODz+XO0fRdfB6qApjZP/R+uqtO5ptGdmmq276z2my5hU8SFhzFEwXCj7tFNFA9w8LVkjJQ==
+use-context-selector@1.2.10:
+  version "1.2.10"
+  resolved "https://registry.yarnpkg.com/use-context-selector/-/use-context-selector-1.2.10.tgz#47230099cd381119ae1c0f4a44737f336932aec0"
+  integrity sha512-gSKcvwl2I683GY5JG/ixsVDeVsIdEdLJz3ccl7y1KaKJqXitX2PjC0Z1F0LEtni1pc7u1J3cy5dHT8+MI69naA==
 
 use-isomorphic-layout-effect@^1.0.0:
   version "1.0.0"
