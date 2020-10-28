@@ -106,7 +106,7 @@ export const useAtomArrayFamily = <Element>(atom: RWAtom<Array<Element>>) => {
   const [elements] = jotai.useAtom(keysAtom)
   const atoms = React.useMemo(
     () =>
-      [...new Array(elements)].map(
+      Array.from(new Array(elements)).map(
         (_, key) => [atomFamilyGetter(key), () => removeItem(key)] as const,
       ),
     [elements, atomFamilyGetter, removeItem],
