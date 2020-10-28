@@ -1,8 +1,8 @@
 import { atomFamily } from 'jotai/utils.cjs'
 import * as jotai from 'jotai'
-import { SetStateAction } from 'jotai/types'
 import * as O from 'optics-ts'
 import React from 'react'
+import { SetStateAction } from 'jotai/core/types'
 
 export function focus<S, A>(
   atom: jotai.WritableAtom<S, SetStateAction<S>>,
@@ -60,9 +60,7 @@ export function focus<S, A>(
 
 export type RWAtom<T> = jotai.WritableAtom<T, SetStateAction<T>>
 
-export const useAtomArrayFamily = <Element extends any>(
-  atom: RWAtom<Array<Element>>,
-) => {
+export const useAtomArrayFamily = <Element>(atom: RWAtom<Array<Element>>) => {
   const optic = React.useCallback(
     (i: number) => O.optic<Array<Element>>().index(i),
     [],
@@ -76,11 +74,11 @@ export const useAtomArrayFamily = <Element extends any>(
       },
       param => (_, set, update) => {
         set(atom, superState => {
-          if (update instanceof Function) {
-            return O.modify(optic(param))(update)(superState)
-          } else {
-            return O.set(optic(param))(update)(superState)
-          }
+          const newValue =
+            update instanceof Function
+              ? O.modify(optic(param))(update)(superState)
+              : O.set(optic(param))(update)(superState)
+          return newValue
         })
       },
     )

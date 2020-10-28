@@ -15,12 +15,12 @@ const useUpdateCount = () => {
 
 it('no unneccesary updates when updating atoms', async () => {
   const todosAtom = atom<Array<TodoItem>>([
-    { task: 'get cat food' },
-    { task: 'get dragon food' },
+    { task: 'get cat food', checked: false },
+    { task: 'get dragon food', checked: false },
   ])
 
-  const TaskList = () => {
-    const atoms = useAtomArrayFamily(todosAtom)
+  const TaskList = ({ atom }: { atom: typeof todosAtom }) => {
+    const atoms = useAtomArrayFamily(atom)
     const updates = useUpdateCount()
     return (
       <>
@@ -57,7 +57,7 @@ it('no unneccesary updates when updating atoms', async () => {
 
   const { findByTestId, findByText } = rtl.render(
     <Provider>
-      <TaskList />
+      <TaskList atom={todosAtom} />
     </Provider>,
   )
 

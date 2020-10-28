@@ -4,33 +4,35 @@ import * as rtl from '@testing-library/react'
 import { RWAtom, useAtomArrayFamily } from '../src/index'
 
 type TodoItem = { task: string; checked?: boolean }
-it('creating an atom family from an atom of array of items', async () => {
+
+it('no unneccesary updates when updating atoms', async () => {
   const todosAtom = atom<Array<TodoItem>>([
-    { task: 'get cat food' },
-    { task: 'get dragon food' },
+    { task: 'get cat food', checked: false },
+    { task: 'get dragon food', checked: false },
   ])
 
-  const TaskList = ({ todoItems }: { todoItems: RWAtom<Array<TodoItem>> }) => {
-    const atoms = useAtomArrayFamily(todoItems)
+  const TaskList = ({ atom }: { atom: typeof todosAtom }) => {
+    const atoms = useAtomArrayFamily(atom)
     return (
       <>
-        {atoms.map(([todoItem, _], index) => (
-          <TaskItem key={index} atom={todoItem} />
+        {atoms.map(([atom, remove], index) => (
+          <TaskItem key={index} onRemove={remove} atom={atom} />
         ))}
       </>
     )
   }
 
-  const TaskItem = ({ atom }: { atom: RWAtom<TodoItem> }) => {
+  const TaskItem = ({
+    atom,
+  }: {
+    atom: RWAtom<TodoItem>
+    onRemove: () => void
+  }) => {
     const [value, onChange] = useAtom(atom)
-    const toggle = () => {
-      onChange(value => {
-        return { ...value, checked: !value.checked }
-      })
-    }
+    const toggle = () =>
+      onChange(value => ({ ...value, checked: !value.checked }))
     return (
-      <li data-testid={value.task}>
-        {value.task}
+      <li>
         <input
           data-testid={`${value.task}-checkbox`}
           type="checkbox"
@@ -43,30 +45,25 @@ it('creating an atom family from an atom of array of items', async () => {
 
   const { findByTestId } = rtl.render(
     <Provider>
-      <TaskList todoItems={todosAtom} />
+      <TaskList atom={todosAtom} />
     </Provider>,
   )
 
-  await findByTestId('get cat food')
-  await findByTestId('get dragon food')
+  const catBox = async () =>
+    (await findByTestId('get cat food-checkbox')) as HTMLInputElement
+  const dragonBox = async () =>
+    (await findByTestId('get dragon food-checkbox')) as HTMLInputElement
 
-  const catBox = (await findByTestId(
-    'get cat food-checkbox',
-  )) as HTMLInputElement
-  const dragonBox = (await findByTestId(
-    'get dragon food-checkbox',
-  )) as HTMLInputElement
+  expect((await catBox()).checked).toBe(false)
+  expect((await dragonBox()).checked).toBe(false)
 
-  expect(catBox.checked).toBe(false)
-  expect(dragonBox.checked).toBe(false)
+  rtl.fireEvent.click(await catBox())
 
-  rtl.fireEvent.click(catBox)
+  expect((await catBox()).checked).toBe(true)
+  expect((await dragonBox()).checked).toBe(false)
 
-  expect(catBox.checked).toBe(true)
-  expect(dragonBox.checked).toBe(false)
+  rtl.fireEvent.click(await dragonBox())
 
-  rtl.fireEvent.click(dragonBox)
-
-  expect(catBox.checked).toBe(true)
-  expect(dragonBox.checked).toBe(true)
+  expect((await catBox()).checked).toBe(true)
+  expect((await dragonBox()).checked).toBe(true)
 })
