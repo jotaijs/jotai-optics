@@ -5,24 +5,24 @@ import React from 'react'
 import { SetStateAction } from 'jotai/core/types'
 
 export function focus<S, A>(
-  atom: jotai.WritableAtom<S, SetStateAction<S>>,
+  atom: jotai.PrimitiveAtom<S>,
   callback: (optic: O.OpticFor<S>) => O.Prism<S, any, A>,
 ): jotai.WritableAtom<A | undefined, SetStateAction<A>>
 
 export function focus<S, A>(
-  atom: jotai.WritableAtom<S, SetStateAction<S>>,
+  atom: jotai.PrimitiveAtom<S>,
   callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>,
 ): jotai.WritableAtom<Array<A>, SetStateAction<A>>
 
 export function focus<S, A>(
-  atom: jotai.WritableAtom<S, SetStateAction<S>>,
+  atom: jotai.PrimitiveAtom<S>,
   callback: (
     optic: O.OpticFor<S>,
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>,
-): jotai.WritableAtom<A, SetStateAction<A>>
+): jotai.PrimitiveAtom<A>
 
 export function focus<S, A>(
-  atom: jotai.WritableAtom<S, SetStateAction<S>>,
+  atom: jotai.PrimitiveAtom<S>,
   callback: (
     optic: O.OpticFor<S>,
   ) =>
@@ -58,9 +58,9 @@ export function focus<S, A>(
   )
 }
 
-export type RWAtom<T> = jotai.WritableAtom<T, SetStateAction<T>>
-
-export const useAtomArrayFamily = <Element>(atom: RWAtom<Array<Element>>) => {
+export const useAtomArrayFamily = <Element>(
+  atom: jotai.PrimitiveAtom<Array<Element>>,
+) => {
   const optic = React.useCallback(
     (i: number) => O.optic<Array<Element>>().index(i),
     [],
