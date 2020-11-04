@@ -8020,10 +8020,10 @@ jest@^25.3.0:
     import-local "^3.0.2"
     jest-cli "^25.5.4"
 
-jotai@^0.10.2:
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-0.10.2.tgz#ae131b2266b41df0cb25fe42f96e89620fc92352"
-  integrity sha512-ejQVCW+Fpv8AsG880qykts3IWJfv/YY6CI+lHkx+KUpWSNO3q+qnLTq1QXWGshSruuJz3NRB+cFHZOeJDOrQqg==
+jotai@^0.10.3:
+  version "0.10.3"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-0.10.3.tgz#c1ca00a4da149aa5aacb346d6273305dddbe8c1d"
+  integrity sha512-MRFdjEbqgnX7F2Zz0h4PUs995UPURQxskXPvnlAzJzXkvhJJWcErTHJx5aAMbnzxhkvTuIaBS3b3TRdOHG++iw==
   dependencies:
     use-context-selector "1.2.10"
 
