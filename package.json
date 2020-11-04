@@ -60,7 +60,7 @@
   "dependencies": {
     "@testing-library/react": "^11.0.4",
     "jest-environment-jsdom-sixteen": "^1.0.3",
-    "jotai": "^0.10.3",
+    "jotai": "^0.10.2",
     "optics-ts": "^1.1.0"
   }
 }
