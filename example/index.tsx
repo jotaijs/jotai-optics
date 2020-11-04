@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { atom, Provider, useAtom } from 'jotai'
-import { focus, RWAtom, useAtomArrayFamily } from '../src/index'
+import { atom, PrimitiveAtom, Provider, useAtom } from 'jotai'
+import { focus, useAtomArrayFamily } from '../src/index'
 import { useUpdateAtom } from 'jotai/utils'
 
 const TodosAtom = atom([
@@ -9,7 +9,7 @@ const TodosAtom = atom([
   { task: 'Go for a walk', checked: false },
 ])
 
-const TodoList = ({ todos }: { todos: RWAtom<Todos> }) => {
+const TodoList = ({ todos }: { todos: PrimitiveAtom<Todos> }) => {
   const atoms = useAtomArrayFamily(todos)
   const changeTodoList = useUpdateAtom(todos)
   return (
@@ -43,7 +43,7 @@ const Todo = ({
   todo,
   onRemove,
 }: {
-  todo: RWAtom<TodoItem>
+  todo: PrimitiveAtom<TodoItem>
   onRemove: () => void
 }) => {
   const [task, onChangeTask] = useAtom(focus(todo, optic => optic.prop('task')))
