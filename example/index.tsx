@@ -2,81 +2,88 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { atom, PrimitiveAtom, Provider, useAtom } from 'jotai'
 import { focus, useAtomArrayFamily } from '../src/index'
-import { useUpdateAtom } from 'jotai/utils'
+import { useAtomCallback, useUpdateAtom } from 'jotai/utils'
 
-const TodosAtom = atom([
-  { task: 'Eat some food', checked: false },
-  { task: 'Go for a walk', checked: false },
+const RecursiveFormAtom = atom<Array<{ [key: string]: string }>>([
+  { task: 'Eat some food', checked: 'yeah' },
+  { task: 'Go for a walk', checked: 'yeah' },
 ])
 
-const TodoList = ({ todos }: { todos: PrimitiveAtom<Todos> }) => {
+const FormList = ({ todos }: { todos: typeof RecursiveFormAtom }) => {
   const atoms = useAtomArrayFamily(todos)
-  const changeTodoList = useUpdateAtom(todos)
+  const changeFormAtom = useUpdateAtom(todos)
   return (
     <ul>
-      {atoms.map(([atom, onRemove]) => (
-        <Todo todo={atom} onRemove={onRemove} />
+      {atoms.map(([atom, onRemove], i) => (
+        <>
+        Form nr ({i})
+        <Form formAtom={atom} onRemove={onRemove} />
+        </>
       ))}
       <button
         onClick={() =>
-          changeTodoList(oldValue => [
+          changeFormAtom(oldValue => [
             ...oldValue,
-            /* TODO: use optic.append (setter) here */
-            { task: 'New task', checked: false },
+            { name: 'New name', otherAttribute: 'value' },
           ])
         }
       >
         Add new todo
       </button>
-      <button
-        onClick={() =>
-          changeTodoList(oldValue => oldValue.filter(x => !x.checked))
-        }
-      >
-        Clear done
-      </button>
     </ul>
   )
 }
 
-const Todo = ({
-  todo,
+const Form = ({
+  formAtom,
   onRemove,
 }: {
-  todo: PrimitiveAtom<TodoItem>
+  formAtom: PrimitiveAtom<{ [key: string]: string }>
   onRemove: () => void
 }) => {
-  const [task, onChangeTask] = useAtom(focus(todo, optic => optic.prop('task')))
-  const [checked, onChangeChecked] = useAtom(
-    focus(todo, optic => optic.prop('checked')),
-  )
+  const entriesAtom = React.useMemo(() => {
+    return focus(formAtom, optic =>
+      optic.iso((from) => Object.entries(from), to => Object.fromEntries(to)),
+    )
+  }, [formAtom])
+  const fieldAtoms = useAtomArrayFamily(entriesAtom)
+  const addField = useAtomCallback((get, set) => {
+    set(entriesAtom, oldValue => [...oldValue, ['Something new', 'New too']])
+  })
 
   return (
-    <li>
+    <ul>
+      {fieldAtoms.map(([fieldAtom, onRemove]) => <Field field={fieldAtom} onRemove={onRemove} />)}
+      <li><button onClick={addField}>Add new field</button></li>
+      <li><button onClick={onRemove}>Remove this form</button></li>
+    </ul>
+  )
+}
+
+const Field = ({field, onRemove}: {field: PrimitiveAtom<[string, string]>, onRemove: () => void}) => {
+  const [[name, value], setField] = useAtom(field)
+
+    return <li>
       <input
         type="text"
-        value={task}
-        onChange={e => onChangeTask(e.target.value)}
+        value={name}
+        onChange={e => setField((oldValue) => [e.target.value, oldValue[1]])}
       />
       <input
-        type="checkbox"
-        checked={checked}
-        onChange={() => onChangeChecked(val => !val)}
+        type="text"
+        value={value}
+        onChange={e => setField((oldValue) => [oldValue[0], e.target.value])}
       />
       <button onClick={onRemove}>X</button>
     </li>
-  )
 }
 
 const App = () => {
   return (
     <Provider>
-      <TodoList todos={TodosAtom} />
+      <FormList todos={RecursiveFormAtom} />
     </Provider>
   )
 }
 
 ReactDOM.render(<App />, document.getElementById('root'))
-
-type TodoItem = { task: string; checked: boolean }
-type Todos = Array<TodoItem>
