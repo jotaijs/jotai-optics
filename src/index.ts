@@ -92,14 +92,13 @@ export const useAtomArrayFamily = <Element>(
     [atom],
   )
 
-  const removeItemAtom = React.useMemo(
-    () =>
-      jotai.atom<undefined, number>(undefined, (get, set, arg): void => {
-        const currState = get(atom)
-        const newState = O.remove(optic(arg))(currState)
-        set(atom, newState)
-      }),
-    [atom, optic],
+  const removeItemAtom = jotai.atom<undefined, number>(
+    undefined,
+    (get, set, arg): void => {
+      const currState = get(atom)
+      const newState = O.remove(optic(arg))(currState)
+      set(atom, newState)
+    },
   )
 
   const [, removeItem] = jotai.useAtom(removeItemAtom)
