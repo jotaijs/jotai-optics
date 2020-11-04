@@ -1,7 +1,7 @@
-import { atom, Provider, useAtom } from 'jotai'
+import { atom, Provider, useAtom, PrimitiveAtom } from 'jotai'
 import React from 'react'
 import * as rtl from '@testing-library/react'
-import { RWAtom, useAtomArrayFamily } from '../src/index'
+import { useAtomArrayFamily } from '../src/index'
 
 type TodoItem = { task: string; checked?: boolean }
 
@@ -35,7 +35,7 @@ it('no unneccesary updates when updating atoms', async () => {
   const TaskItem = ({
     atom,
   }: {
-    atom: RWAtom<TodoItem>
+    atom: PrimitiveAtom<TodoItem>
     onRemove: () => void
   }) => {
     const [value, onChange] = useAtom(atom)
