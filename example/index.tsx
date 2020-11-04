@@ -2,33 +2,44 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { atom, PrimitiveAtom, Provider, useAtom } from 'jotai'
 import { focus, useAtomArrayFamily } from '../src/index'
-import { useAtomCallback, useUpdateAtom } from 'jotai/utils'
+import { useAtomCallback, useSelector, useUpdateAtom } from 'jotai/utils'
 
-const RecursiveFormAtom = atom<Array<{ [key: string]: string }>>([
-  { task: 'Eat some food', checked: 'yeah' },
-  { task: 'Go for a walk', checked: 'yeah' },
-])
+
+const OriginalAtom = atom<Record<string, Record<string, string>>>(
+  {
+    form1: { task: 'Eat some food', checked: 'yeah' },
+  form2: { task: 'Eat some food', checked: 'yeah' }
+},
+)
+
+const RecursiveFormAtom: typeof OriginalAtom = atom(get => get(OriginalAtom), (get, set,param)=> {
+  set(OriginalAtom, param)
+})
 
 const FormList = ({ todos }: { todos: typeof RecursiveFormAtom }) => {
-  const atoms = useAtomArrayFamily(todos)
+  const entriesAtom = React.useMemo(() => {
+    return focus(todos, optic =>
+      optic.iso((from) => Object.entries(from), to => Object.fromEntries(to)),
+    )
+  }, [todos])
+  const atoms = useAtomArrayFamily(entriesAtom) as Array<[PrimitiveAtom<[string, Record<string, string>]>, () => void]>
   const changeFormAtom = useUpdateAtom(todos)
   return (
     <ul>
       {atoms.map(([atom, onRemove], i) => (
-        <>
-        Form nr ({i})
-        <Form formAtom={atom} onRemove={onRemove} />
-        </>
+        <div key={i}>
+          <Form formAtom={atom} onRemove={onRemove} />
+        </div>
       ))}
       <button
         onClick={() =>
-          changeFormAtom(oldValue => [
+          changeFormAtom(oldValue => ({
             ...oldValue,
-            { name: 'New name', otherAttribute: 'value' },
-          ])
+            [`newForm ${Math.random()}`]: { name: 'New name', otherAttribute: 'value' },
+          }))
         }
       >
-        Add new todo
+        Add another form
       </button>
     </ul>
   )
@@ -38,25 +49,27 @@ const Form = ({
   formAtom,
   onRemove,
 }: {
-  formAtom: PrimitiveAtom<{ [key: string]: string }>
+  formAtom: PrimitiveAtom<[string, Record<string, string>]>
   onRemove: () => void
 }) => {
   const entriesAtom = React.useMemo(() => {
     return focus(formAtom, optic =>
-      optic.iso((from) => Object.entries(from), to => Object.fromEntries(to)),
+      optic.index(1).iso((from) => Object.entries(from), to => Object.fromEntries(to)),
     )
-  }, [formAtom])
-  const fieldAtoms = useAtomArrayFamily(entriesAtom)
-  const addField = useAtomCallback((get, set) => {
-    set(entriesAtom, oldValue => [...oldValue, ['Something new', 'New too']])
-  })
+  }, [formAtom]) as PrimitiveAtom<[string, string][]>
+  const fieldAtoms = useAtomArrayFamily(entriesAtom) as Array<[PrimitiveAtom<[string, string]>, () => void]>
+  const addField = useAtomCallback(React.useCallback((get, set) => {
+    set(entriesAtom, oldValue => [...oldValue, ['Something new' + Math.random(), 'New too']])
+  }, []))
+  const fieldName = useSelector(formAtom, value => value[0])
 
   return (
-    <ul>
-      {fieldAtoms.map(([fieldAtom, onRemove]) => <Field field={fieldAtom} onRemove={onRemove} />)}
-      <li><button onClick={addField}>Add new field</button></li>
-      <li><button onClick={onRemove}>Remove this form</button></li>
-    </ul>
+    <div>
+      <h1>{fieldName}</h1>
+      <ul>{fieldAtoms.map(([fieldAtom, onRemove], index) => <Field key={index} field={fieldAtom} onRemove={onRemove} />)}</ul>
+      <div><button style={{width: '100%'}} onClick={addField}>Add new field</button></div>
+      <div><button onClick={onRemove}>Remove this form</button></div>
+    </div>
   )
 }
 

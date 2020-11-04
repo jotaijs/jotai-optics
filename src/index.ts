@@ -1,4 +1,4 @@
-import { atomFamily } from 'jotai/utils.cjs'
+import { atomFamily, useAtomCallback, useSelector } from 'jotai/utils.cjs'
 import * as jotai from 'jotai'
 import * as O from 'optics-ts'
 import React from 'react'
@@ -57,7 +57,6 @@ export function focus<S, A>(
     },
   )
 }
-
 export const useAtomArrayFamily = <Element>(
   atom: jotai.PrimitiveAtom<Array<Element>>,
 ) => {
@@ -84,32 +83,25 @@ export const useAtomArrayFamily = <Element>(
     )
   }, [atom, optic])
 
-  const keysAtom = React.useMemo(
-    () =>
-      jotai.atom(get => {
-        return get(atom).length
-      }),
-    [atom],
+  const removeItem = useAtomCallback<void, number>(
+    React.useCallback(
+      (_get, set, arg) => {
+        set(atom, O.remove(optic(arg)))
+      },
+      [atom, optic],
+    ),
   )
 
-  const removeItemAtom = jotai.atom<undefined, number>(
-    undefined,
-    (get, set, arg): void => {
-      const currState = get(atom)
-      const newState = O.remove(optic(arg))(currState)
-      set(atom, newState)
-    },
+  return useSelector(
+    atom,
+    React.useCallback(
+      elements => {
+        const length = elements.length
+        return Array.from(new Array(length)).map(
+          (_, key) => [atomFamilyGetter(key), () => removeItem(key)] as const,
+        )
+      },
+      [atomFamilyGetter, removeItem],
+    ),
   )
-
-  const [, removeItem] = jotai.useAtom(removeItemAtom)
-
-  const [elements] = jotai.useAtom(keysAtom)
-  const atoms = React.useMemo(
-    () =>
-      Array.from(new Array(elements)).map(
-        (_, key) => [atomFamilyGetter(key), () => removeItem(key)] as const,
-      ),
-    [elements, atomFamilyGetter, removeItem],
-  )
-  return atoms
 }
