@@ -24,6 +24,7 @@ const FormList = ({ todos }: { todos: typeof RecursiveFormAtom }) => {
   }, [todos])
   const atoms = useAtomArrayFamily(entriesAtom) as Array<[PrimitiveAtom<[string, Record<string, string>]>, () => void]>
   const changeFormAtom = useUpdateAtom(todos)
+  const formNames = useSelector(entriesAtom, React.useCallback(value => value.map(v => v[0]),[]))
   return (
     <ul>
       {atoms.map(([atom, onRemove], i) => (
@@ -41,6 +42,7 @@ const FormList = ({ todos }: { todos: typeof RecursiveFormAtom }) => {
       >
         Add another form
       </button>
+      {formNames.map(value => <div>{value}</div>)}
     </ul>
   )
 }
@@ -61,11 +63,11 @@ const Form = ({
   const addField = useAtomCallback(React.useCallback((get, set) => {
     set(entriesAtom, oldValue => [...oldValue, ['Something new' + Math.random(), 'New too']])
   }, []))
-  const fieldName = useSelector(formAtom, value => value[0])
+  const [fieldName, setFieldName] = useAtom(React.useMemo(() => focus(formAtom, optic => optic.index(0)) as PrimitiveAtom<string>, []))
 
   return (
     <div>
-      <h1>{fieldName}</h1>
+      <h1><input value={fieldName} onChange={(event) => setFieldName(event.target.value)} /></h1>
       <ul>{fieldAtoms.map(([fieldAtom, onRemove], index) => <Field key={index} field={fieldAtom} onRemove={onRemove} />)}</ul>
       <div><button style={{width: '100%'}} onClick={addField}>Add new field</button></div>
       <div><button onClick={onRemove}>Remove this form</button></div>

@@ -67,18 +67,15 @@ export const useAtomArrayFamily = <Element>(
 
   const atomFamilyGetter = React.useMemo(() => {
     return atomFamily<number, Element, SetStateAction<Element>>(
-      param => get => {
+      param => get =>
         // Kindly coercing this from `Element | undefined` to `Element`
-        return O.preview(optic(param))(get(atom)) as Element
-      },
+        O.preview(optic(param))(get(atom)) as Element,
       param => (_, set, update) => {
-        set(atom, superState => {
-          const newValue =
-            update instanceof Function
-              ? O.modify(optic(param))(update)(superState)
-              : O.set(optic(param))(update)(superState)
-          return newValue
-        })
+        set(atom, superState =>
+          update instanceof Function
+            ? O.modify(optic(param))(update)(superState)
+            : O.set(optic(param))(update)(superState),
+        )
       },
     )
   }, [atom, optic])
