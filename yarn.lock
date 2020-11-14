@@ -5920,7 +5920,7 @@ fast-deep-equal@^2.0.1:
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"
   integrity sha1-ewUhjd+WZ79/Nwv3/bLLFf3Qqkk=
 
-fast-deep-equal@^3.1.1:
+fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
@@ -8020,12 +8020,12 @@ jest@^25.3.0:
     import-local "^3.0.2"
     jest-cli "^25.5.4"
 
-jotai@^0.10.3:
-  version "0.10.3"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-0.10.3.tgz#c1ca00a4da149aa5aacb346d6273305dddbe8c1d"
-  integrity sha512-MRFdjEbqgnX7F2Zz0h4PUs995UPURQxskXPvnlAzJzXkvhJJWcErTHJx5aAMbnzxhkvTuIaBS3b3TRdOHG++iw==
+jotai@^0.10.5:
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-0.10.5.tgz#78083a8cc8c6141642c2b694bfd1bf2984ca7794"
+  integrity sha512-dOvm3RUwjFdsbndHS1qotEwnWlyPSNnxhROad02YSs7m3PkxsyzmXgyyq+nLhEukx20OvAZeyWv4XE/h56X6yg==
   dependencies:
-    use-context-selector "1.2.10"
+    use-context-selector "1.2.11"
 
 jpjs@^1.2.1:
   version "1.2.1"
@@ -12374,10 +12374,10 @@ use-composed-ref@^1.0.0:
   dependencies:
     ts-essentials "^2.0.3"
 
-use-context-selector@1.2.10:
-  version "1.2.10"
-  resolved "https://registry.yarnpkg.com/use-context-selector/-/use-context-selector-1.2.10.tgz#47230099cd381119ae1c0f4a44737f336932aec0"
-  integrity sha512-gSKcvwl2I683GY5JG/ixsVDeVsIdEdLJz3ccl7y1KaKJqXitX2PjC0Z1F0LEtni1pc7u1J3cy5dHT8+MI69naA==
+use-context-selector@1.2.11:
+  version "1.2.11"
+  resolved "https://registry.yarnpkg.com/use-context-selector/-/use-context-selector-1.2.11.tgz#2b7dd6ed045e4594c1936134f1465d46d01267e7"
+  integrity sha512-roElSNplrQSxUV3dM4ouCVC8xnLAIvh4ulF16Wgsyb+b7Gd23rUughZKkL0DvH48FI4mewwmwqVCU+z5PUEfAg==
 
 use-isomorphic-layout-effect@^1.0.0:
   version "1.0.0"

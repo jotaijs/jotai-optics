@@ -1,7 +1,7 @@
 import { atom, Provider, useAtom, PrimitiveAtom } from 'jotai'
 import React from 'react'
 import * as rtl from '@testing-library/react'
-import { useAtomArrayFamily } from '../src/index'
+import { useAtomArraySlice } from '../src/index'
 
 type TodoItem = { task: string; checked?: boolean }
 
@@ -20,7 +20,7 @@ it('no unneccesary updates when updating atoms', async () => {
   ])
 
   const TaskList = ({ atom }: { atom: typeof todosAtom }) => {
-    const atoms = useAtomArrayFamily(atom)
+    const atoms = useAtomArraySlice(atom)
     const updates = useUpdateCount()
     return (
       <>
