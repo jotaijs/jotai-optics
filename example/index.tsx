@@ -1,34 +1,72 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { atom, PrimitiveAtom, Provider, useAtom } from 'jotai'
-import { focus, useAtomArrayFamily } from '../src/index'
+import { useFocus, useAtomArraySlice } from '../src/index'
 import { useAtomCallback, useUpdateAtom } from 'jotai/utils'
 
-const RecursiveFormAtom = atom<Array<{ [key: string]: string }>>([
-  { task: 'Eat some food', checked: 'yeah' },
-  { task: 'Go for a walk', checked: 'yeah' },
-])
+const OriginalAtom = atom<Record<string, Record<string, string>>>(
+  {
+    form1: { task: 'Eat some food', checked: 'yeah' },
+    form2: { task: 'Eat some food', checked: 'yeah' },
+    form3: { task: 'Eat some food', checked: 'yeah' },
+    form4: { task: 'Eat some food', checked: 'yeah' },
+    form5: { task: 'Eat some food', checked: 'yeah' },
+    form6: { task: 'Eat some food', checked: 'yeah' },
+    form7: { task: 'Eat some food', checked: 'yeah' },
+    form8: { task: 'Eat some food', checked: 'yeah' },
+    form12: { task: 'Eat some food', checked: 'yeah' },
+    form22: { task: 'Eat some food', checked: 'yeah' },
+    form32: { task: 'Eat some food', checked: 'yeah' },
+    form42: { task: 'Eat some food', checked: 'yeah' },
+    form52: { task: 'Eat some food', checked: 'yeah' },
+    form62: { task: 'Eat some food', checked: 'yeah' },
+    form72: { task: 'Eat some food', checked: 'yeah' },
+    form82: { task: 'Eat some food', checked: 'yeah' },
+    form14: { task: 'Eat some food', checked: 'yeah' },
+    form24: { task: 'Eat some food', checked: 'yeah' },
+    form34: { task: 'Eat some food', checked: 'yeah' },
+    form44: { task: 'Eat some food', checked: 'yeah' },
+    form54: { task: 'Eat some food', checked: 'yeah' },
+    form64: { task: 'Eat some food', checked: 'yeah' },
+    form74: { task: 'Eat some food', checked: 'yeah' },
+    form84: { task: 'Eat some food', checked: 'yeah' },
+    form15: { task: 'Eat some food', checked: 'yeah' },
+    form25: { task: 'Eat some food', checked: 'yeah' },
+    form35: { task: 'Eat some food', checked: 'yeah' },
+    form45: { task: 'Eat some food', checked: 'yeah' },
+    form55: { task: 'Eat some food', checked: 'yeah' },
+    form65: { task: 'Eat some food', checked: 'yeah' },
+    form75: { task: 'Eat some food', checked: 'yeah' },
+    form85: { task: 'Eat some food', checked: 'yeah' },
+  },
+)
+
+const RecursiveFormAtom: typeof OriginalAtom = atom(get => get(OriginalAtom), (get, set,param)=> {
+  set(OriginalAtom, param)
+})
 
 const FormList = ({ todos }: { todos: typeof RecursiveFormAtom }) => {
-  const atoms = useAtomArrayFamily(todos)
+  const entriesAtom = useFocus(todos, optic =>
+      optic.iso((from) => Object.entries(from), to => Object.fromEntries(to)
+  ))
+  const atoms = useAtomArraySlice(entriesAtom) as Array<[PrimitiveAtom<[string, Record<string, string>]>, () => void]>
   const changeFormAtom = useUpdateAtom(todos)
   return (
     <ul>
       {atoms.map(([atom, onRemove], i) => (
-        <>
-        Form nr ({i})
-        <Form formAtom={atom} onRemove={onRemove} />
-        </>
+        <div key={i}>
+          <Form formAtom={atom} onRemove={onRemove} />
+        </div>
       ))}
       <button
         onClick={() =>
-          changeFormAtom(oldValue => [
+          changeFormAtom(oldValue => ({
             ...oldValue,
-            { name: 'New name', otherAttribute: 'value' },
-          ])
+            [`newForm ${Math.random()}`]: { name: 'New name', otherAttribute: 'value' },
+          }))
         }
       >
-        Add new todo
+        Add another form
       </button>
     </ul>
   )
@@ -38,25 +76,25 @@ const Form = ({
   formAtom,
   onRemove,
 }: {
-  formAtom: PrimitiveAtom<{ [key: string]: string }>
+  formAtom: PrimitiveAtom<[string, Record<string, string>]>
   onRemove: () => void
 }) => {
-  const entriesAtom = React.useMemo(() => {
-    return focus(formAtom, optic =>
-      optic.iso((from) => Object.entries(from), to => Object.fromEntries(to)),
-    )
-  }, [formAtom])
-  const fieldAtoms = useAtomArrayFamily(entriesAtom)
+  const entriesAtom = useFocus(formAtom, optic =>
+      optic.index(1).iso((from) => Object.entries(from), to => Object.fromEntries(to)),
+    ) as PrimitiveAtom<[string, string][]>
+  const fieldAtoms = useAtomArraySlice(entriesAtom) as Array<[PrimitiveAtom<[string, string]>, () => void]>
   const addField = useAtomCallback((get, set) => {
-    set(entriesAtom, oldValue => [...oldValue, ['Something new', 'New too']])
+    set(entriesAtom, oldValue => [...oldValue, ['Something new' + Math.random(), 'New too']])
   })
+  const [fieldName, setFieldName] = useAtom(useFocus(formAtom, optic => optic.index(0)) as PrimitiveAtom<string>)
 
   return (
-    <ul>
-      {fieldAtoms.map(([fieldAtom, onRemove]) => <Field field={fieldAtom} onRemove={onRemove} />)}
-      <li><button onClick={addField}>Add new field</button></li>
-      <li><button onClick={onRemove}>Remove this form</button></li>
-    </ul>
+    <div>
+      <h1><input value={fieldName} onChange={(event) => setFieldName(event.target.value)} /></h1>
+      <ul>{fieldAtoms.map(([fieldAtom, onRemove], index) => <Field key={index} field={fieldAtom} onRemove={onRemove} />)}</ul>
+      <div><button style={{width: '100%'}} onClick={addField}>Add new field</button></div>
+      <div><button onClick={onRemove}>Remove this form</button></div>
+    </div>
   )
 }
 
