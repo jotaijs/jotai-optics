@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { atom, PrimitiveAtom, Provider, useAtom } from 'jotai'
 import { useFocus, useAtomArraySlice } from '../src/index'
-import { useAtomCallback, useSelector, useUpdateAtom } from 'jotai/utils'
+import { useAtomCallback, useUpdateAtom } from 'jotai/utils'
 
 const OriginalAtom = atom<Record<string, Record<string, string>>>(
   {
@@ -46,8 +46,8 @@ const RecursiveFormAtom: typeof OriginalAtom = atom(get => get(OriginalAtom), (g
 })
 
 const FormList = ({ todos }: { todos: typeof RecursiveFormAtom }) => {
-  const entriesAtom = useFocus(todos, React.useCallback(optic =>
-      optic.iso((from) => Object.entries(from), to => Object.fromEntries(to)),[]
+  const entriesAtom = useFocus(todos, optic =>
+      optic.iso((from) => Object.entries(from), to => Object.fromEntries(to)
   ))
   const atoms = useAtomArraySlice(entriesAtom) as Array<[PrimitiveAtom<[string, Record<string, string>]>, () => void]>
   const changeFormAtom = useUpdateAtom(todos)
@@ -72,7 +72,7 @@ const FormList = ({ todos }: { todos: typeof RecursiveFormAtom }) => {
   )
 }
 
-const Form = React.memo(({
+const Form = ({
   formAtom,
   onRemove,
 }: {
@@ -83,9 +83,9 @@ const Form = React.memo(({
       optic.index(1).iso((from) => Object.entries(from), to => Object.fromEntries(to)),
     ) as PrimitiveAtom<[string, string][]>
   const fieldAtoms = useAtomArraySlice(entriesAtom) as Array<[PrimitiveAtom<[string, string]>, () => void]>
-  const addField = useAtomCallback(React.useCallback((get, set) => {
+  const addField = useAtomCallback((get, set) => {
     set(entriesAtom, oldValue => [...oldValue, ['Something new' + Math.random(), 'New too']])
-  }, []))
+  })
   const [fieldName, setFieldName] = useAtom(useFocus(formAtom, optic => optic.index(0)) as PrimitiveAtom<string>)
 
   return (
@@ -96,7 +96,7 @@ const Form = React.memo(({
       <div><button onClick={onRemove}>Remove this form</button></div>
     </div>
   )
-})
+}
 
 const Field = ({field, onRemove}: {field: PrimitiveAtom<[string, string]>, onRemove: () => void}) => {
   const [[name, value], setField] = useAtom(field)
