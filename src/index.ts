@@ -84,9 +84,10 @@ export const useAtomArraySlice = <Element>(
 
   const atomFamilyGetter = React.useMemo(() => {
     return atomFamily<number, Element, SetStateAction<Element>>(
-      param => get =>
+      param => get => {
         // Kindly coercing this from `Element | undefined` to `Element`
-        get(atom)[param],
+        return get(atom)[param]
+      },
       param => (_, set, update) => {
         set(atom, superState =>
           update instanceof Function
@@ -116,5 +117,6 @@ export const useAtomArraySlice = <Element>(
         )
       }
     }, [atomFamilyGetter, removeItem]),
+    (left, right) => left && left.length === right.length,
   )
 }
