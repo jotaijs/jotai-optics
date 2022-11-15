@@ -1,1 +1,2 @@
-src/atomfamily-copy-no-cjs-exported.ts
+/dist
+/src/vendor

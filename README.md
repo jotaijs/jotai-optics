@@ -1,8 +1,7 @@
 # jotai-optics
 
-# DEPRECATED
+👻💎
 
-This package has become mainline, and is included in jotai now. 
+Jotai integration library for optics-ts
 
-Please use the provided `focusAtom` utility from jotai now:
-https://github.com/pmndrs/jotai
+https://jotai.org/docs/integrations/optics
