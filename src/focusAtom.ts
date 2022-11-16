@@ -2,16 +2,12 @@ import { atom } from 'jotai'
 import type { SetStateAction, WritableAtom } from 'jotai'
 import * as O from 'optics-ts'
 
+const getCached = <T>(c: () => T, m: WeakMap<object, T>, k: object): T =>
+  (m.has(k) ? m : m.set(k, c())).get(k) as T
 const cache1 = new WeakMap()
-const memoize = <T>(create: () => T, dep1: object, dep2: object): T => {
-  if (!cache1.has(dep1)) {
-    cache1.set(dep1, new WeakMap())
-  }
-  const cache2 = cache1.get(dep1)
-  if (!cache2.has(dep2)) {
-    cache2.set(dep2, create())
-  }
-  return cache2.get(dep2)
+const memo2 = <T>(create: () => T, dep1: object, dep2: object): T => {
+  const cache2 = getCached(() => new WeakMap(), cache1, dep1)
+  return getCached(create, cache2, dep2)
 }
 
 const isFunction = <T>(x: T): x is T & ((...args: any[]) => any) =>
@@ -64,7 +60,7 @@ export function focusAtom<S, A, R extends void | Promise<void>>(
     | O.Prism<S, any, A>
     | O.Traversal<S, any, A>
 ) {
-  return memoize(
+  return memo2(
     () => {
       const focus = callback(O.optic<S>())
       const derivedAtom = atom(
