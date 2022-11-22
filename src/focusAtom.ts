@@ -16,17 +16,17 @@ const isFunction = <T>(x: T): x is T & ((...args: any[]) => any) =>
 type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T
 
 export function focusAtom<S, A, R>(
-  baseAtom: WritableAtom<Promise<S>, [NonFunction<Promise<S>>], R>,
+  baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
   callback: (optic: O.OpticFor<S>) => O.Prism<S, any, A>
 ): WritableAtom<Promise<A | undefined>, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
-  baseAtom: WritableAtom<Promise<S>, [NonFunction<Promise<S>>], R>,
+  baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
   callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>
 ): WritableAtom<Promise<A[]>, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
-  baseAtom: WritableAtom<Promise<S>, [NonFunction<Promise<S>>], R>,
+  baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
   callback: (
     optic: O.OpticFor<S>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
