@@ -1,6 +1,7 @@
 import React, { StrictMode } from 'react'
 import { fireEvent, render } from '@testing-library/react'
-import { atom, useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
+import { atom } from 'jotai/vanilla'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
 

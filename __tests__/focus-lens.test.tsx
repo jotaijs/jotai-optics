@@ -1,7 +1,8 @@
 import React, { StrictMode, Suspense } from 'react'
 import { fireEvent, render } from '@testing-library/react'
-import { atom, useAtom } from 'jotai'
-import type { SetStateAction } from 'jotai'
+import { useAtom } from 'jotai/react'
+import { atom } from 'jotai/vanilla'
+import type { SetStateAction } from 'jotai/vanilla'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
 
@@ -131,8 +132,10 @@ it('focus on async atom works', async () => {
   const baseAtom = atom({ count: 0 })
   const asyncAtom = atom(
     (get) => Promise.resolve(get(baseAtom)),
-    (_get, set, param: SetStateAction<{ count: number }>) => {
-      set(baseAtom, param)
+    async (get, set, param: SetStateAction<Promise<{ count: number }>>) => {
+      const prev = Promise.resolve(get(baseAtom))
+      const next = await (typeof param === 'function' ? param(prev) : param)
+      set(baseAtom, next)
     }
   )
   const focusFunction = (optic: O.OpticFor<{ count: number }>) =>
@@ -144,11 +147,14 @@ it('focus on async atom works', async () => {
     const [baseValue, setBase] = useAtom(baseAtom)
     return (
       <>
-        <div>baseAtom: {JSON.stringify(baseValue)}</div>
-        <div>asyncAtom: {JSON.stringify(asyncValue)}</div>
+        <div>baseAtom: {baseValue.count}</div>
+        <div>asyncAtom: {asyncValue.count}</div>
         <div>count: {count}</div>
         <button onClick={() => setCount(succ)}>incr count</button>
-        <button onClick={() => setAsync((v) => ({ count: v.count + 1 }))}>
+        <button
+          onClick={() =>
+            setAsync((p) => p.then((v) => ({ count: v.count + 1 })))
+          }>
           incr async
         </button>
         <button onClick={() => setBase((v) => ({ count: v.count + 1 }))}>
@@ -166,53 +172,22 @@ it('focus on async atom works', async () => {
     </StrictMode>
   )
 
-  await findByText('baseAtom: {"count":0}')
-  await findByText('asyncAtom: {"count":0}')
+  await findByText('baseAtom: 0')
+  await findByText('asyncAtom: 0')
   await findByText('count: 0')
 
   fireEvent.click(getByText('incr count'))
-  await findByText('baseAtom: {"count":1}')
-  await findByText('asyncAtom: {"count":1}')
+  await findByText('baseAtom: 1')
+  await findByText('asyncAtom: 1')
   await findByText('count: 1')
 
   fireEvent.click(getByText('incr async'))
-  await findByText('baseAtom: {"count":2}')
-  await findByText('asyncAtom: {"count":2}')
+  await findByText('baseAtom: 2')
+  await findByText('asyncAtom: 2')
   await findByText('count: 2')
 
   fireEvent.click(getByText('incr base'))
-  await findByText('baseAtom: {"count":3}')
-  await findByText('asyncAtom: {"count":3}')
+  await findByText('baseAtom: 3')
+  await findByText('asyncAtom: 3')
   await findByText('count: 3')
-})
-
-it('basic derivation using focus with scope works', async () => {
-  const scope = Symbol()
-  const bigAtom = atom({ a: 0 })
-  const focusFunction = (optic: O.OpticFor<{ a: number }>) => optic.prop('a')
-
-  const Counter = () => {
-    const [count, setCount] = useAtom(focusAtom(bigAtom, focusFunction), scope)
-    const [bigAtomValue] = useAtom(bigAtom, scope)
-    return (
-      <>
-        <div>bigAtom: {JSON.stringify(bigAtomValue)}</div>
-        <div>count: {count}</div>
-        <button onClick={() => setCount(succ)}>incr</button>
-      </>
-    )
-  }
-
-  const { getByText, findByText } = render(
-    <StrictMode>
-      <Counter />
-    </StrictMode>
-  )
-
-  await findByText('count: 0')
-  await findByText('bigAtom: {"a":0}')
-
-  fireEvent.click(getByText('incr'))
-  await findByText('count: 1')
-  await findByText('bigAtom: {"a":1}')
 })

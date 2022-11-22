@@ -1,5 +1,5 @@
-import { atom } from 'jotai'
-import type { SetStateAction, WritableAtom } from 'jotai'
+import { atom } from 'jotai/vanilla'
+import type { SetStateAction, WritableAtom } from 'jotai/vanilla'
 import * as O from 'optics-ts'
 
 const getCached = <T>(c: () => T, m: WeakMap<object, T>, k: object): T =>
@@ -15,42 +15,42 @@ const isFunction = <T>(x: T): x is T & ((...args: any[]) => any) =>
 
 type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T
 
-export function focusAtom<S, A, R extends void | Promise<void>>(
-  baseAtom: WritableAtom<Promise<S>, NonFunction<S>, R>,
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S>, [NonFunction<Promise<S>>], R>,
   callback: (optic: O.OpticFor<S>) => O.Prism<S, any, A>
-): WritableAtom<A | undefined, SetStateAction<A>, R>
+): WritableAtom<Promise<A | undefined>, [SetStateAction<A>], R>
 
-export function focusAtom<S, A, R extends void | Promise<void>>(
-  baseAtom: WritableAtom<Promise<S>, NonFunction<S>, R>,
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S>, [NonFunction<Promise<S>>], R>,
   callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>
-): WritableAtom<A[], SetStateAction<A>, R>
+): WritableAtom<Promise<A[]>, [SetStateAction<A>], R>
 
-export function focusAtom<S, A, R extends void | Promise<void>>(
-  baseAtom: WritableAtom<Promise<S>, NonFunction<S>, R>,
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S>, [NonFunction<Promise<S>>], R>,
   callback: (
     optic: O.OpticFor<S>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
-): WritableAtom<A, SetStateAction<A>, R>
+): WritableAtom<Promise<A>, [SetStateAction<A>], R>
 
-export function focusAtom<S, A, R extends void | Promise<void>>(
-  baseAtom: WritableAtom<S, NonFunction<S>, R>,
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
   callback: (optic: O.OpticFor<S>) => O.Prism<S, any, A>
-): WritableAtom<A | undefined, SetStateAction<A>, R>
+): WritableAtom<A | undefined, [SetStateAction<A>], R>
 
-export function focusAtom<S, A, R extends void | Promise<void>>(
-  baseAtom: WritableAtom<S, NonFunction<S>, R>,
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
   callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>
-): WritableAtom<A[], SetStateAction<A>, R>
+): WritableAtom<A[], [SetStateAction<A>], R>
 
-export function focusAtom<S, A, R extends void | Promise<void>>(
-  baseAtom: WritableAtom<S, NonFunction<S>, R>,
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
   callback: (
     optic: O.OpticFor<S>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
-): WritableAtom<A, SetStateAction<A>, R>
+): WritableAtom<A, [SetStateAction<A>], R>
 
-export function focusAtom<S, A, R extends void | Promise<void>>(
-  baseAtom: WritableAtom<S, NonFunction<S>, R>,
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
   callback: (
     optic: O.OpticFor<S>
   ) =>
@@ -64,14 +64,22 @@ export function focusAtom<S, A, R extends void | Promise<void>>(
     () => {
       const focus = callback(O.optic<S>())
       const derivedAtom = atom(
-        (get) => getValueUsingOptic(focus, get(baseAtom)),
+        (get) => {
+          const base = get(baseAtom)
+          return base instanceof Promise
+            ? base.then((v) => getValueUsingOptic(focus, v))
+            : getValueUsingOptic(focus, base)
+        },
         (get, set, update: SetStateAction<A>) => {
           const newValueProducer = isFunction(update)
             ? O.modify(focus)(update)
             : O.set(focus)(update)
+          const base = get(baseAtom)
           return set(
             baseAtom,
-            newValueProducer(get(baseAtom)) as NonFunction<S>
+            (base instanceof Promise
+              ? base.then(newValueProducer)
+              : newValueProducer(base)) as NonFunction<S>
           )
         }
       )
