@@ -38,6 +38,11 @@ export function focusAtom<S, A, R extends void | Promise<void>>(
 ): WritableAtom<A | undefined, SetStateAction<A>, R>
 
 export function focusAtom<S, A, R extends void | Promise<void>>(
+  baseAtom: WritableAtom<S | undefined, NonFunction<S>, R>,
+  callback: (optic: O.OpticFor<S | undefined>) => O.Prism<S, any, A>
+): WritableAtom<A | undefined, SetStateAction<A>, R>
+
+export function focusAtom<S, A, R extends void | Promise<void>>(
   baseAtom: WritableAtom<S, NonFunction<S>, R>,
   callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>
 ): WritableAtom<A[], SetStateAction<A>, R>
