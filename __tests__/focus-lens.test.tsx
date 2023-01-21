@@ -244,6 +244,6 @@ it('typescript should accept "undefined" as valid value for lens', async () => {
   })
 
   expectTypeOf(derivedLens).toMatchTypeOf<
-    WritableAtom<string | undefined, SetStateAction<string>, void>
+    WritableAtom<string, SetStateAction<string>, void>
   >()
 })

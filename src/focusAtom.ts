@@ -59,7 +59,7 @@ export function focusAtom<S, A, R extends void | Promise<void>>(
   callback: (
     optic: O.OpticFor<S | undefined>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
-): WritableAtom<A | undefined, SetStateAction<A>, R>
+): WritableAtom<A, SetStateAction<A>, R>
 
 export function focusAtom<S, A, R extends void | Promise<void>>(
   baseAtom: WritableAtom<S, NonFunction<S>, R>,
