@@ -1,6 +1,7 @@
 import React, { StrictMode, Suspense } from 'react'
 import { fireEvent, render } from '@testing-library/react'
-import { atom, useAtom } from 'jotai'
+import { expectTypeOf } from 'expect-type'
+import { WritableAtom, atom, useAtom } from 'jotai'
 import type { SetStateAction } from 'jotai'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
@@ -215,4 +216,34 @@ it('basic derivation using focus with scope works', async () => {
   fireEvent.click(getByText('incr'))
   await findByText('count: 1')
   await findByText('bigAtom: {"a":1}')
+})
+
+type BillingData = {
+  id: string
+}
+
+type CustomerData = {
+  id: string
+  billing: BillingData[]
+  someOtherData: string
+}
+
+it('typescript should accept "undefined" as valid value for lens', async () => {
+  const customerListAtom = atom<CustomerData[]>([])
+
+  const foundCustomerAtom = focusAtom(customerListAtom, (optic) =>
+    optic.find((el) => el.id === 'some-invalid-id')
+  )
+
+  const derivedLens = focusAtom(foundCustomerAtom, (optic) => {
+    const result = optic
+      .valueOr({ someOtherData: '' } as unknown as CustomerData)
+      .prop('someOtherData')
+
+    return result
+  })
+
+  expectTypeOf(derivedLens).toMatchTypeOf<
+    WritableAtom<string | undefined, SetStateAction<string>, void>
+  >()
 })
