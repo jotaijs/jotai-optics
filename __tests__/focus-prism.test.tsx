@@ -74,6 +74,7 @@ type BillingData = {
 type CustomerData = {
   id: string
   billing: BillingData[]
+  someDynamicData?: string
 }
 
 it('typescript should work well with nested arrays containing optional values', async () => {
@@ -95,4 +96,31 @@ it('typescript should work well with nested arrays containing optional values', 
   expectTypeOf(derivedAtom).toMatchTypeOf<
     WritableAtom<BillingData | undefined, SetStateAction<BillingData>, void>
   >()
+})
+
+it('should work with promise based atoms with "undefined" value', async () => {
+  const customerBaseAtom = atom<CustomerData | undefined>(undefined)
+
+  const asyncCustomerDataAtom = atom(
+    async (get) => Promise.resolve(get(customerBaseAtom)),
+    async (_, set, nextValue: Promise<CustomerData | undefined>) => {
+      set(customerBaseAtom, (await nextValue) || undefined)
+    }
+  )
+
+  const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) => {
+    return optic.optional()
+  })
+
+  const derivedPromiseAtom = focusAtom(focusedPromiseAtom, (optic) =>
+    optic.optional()
+  )
+
+  expectTypeOf(derivedPromiseAtom).toMatchTypeOf<
+    WritableAtom<
+      Promise<string | undefined> | undefined,
+      SetStateAction<Promise<CustomerData | undefined>>,
+      Promise<CustomerData | undefined>
+    >
+  >
 })
