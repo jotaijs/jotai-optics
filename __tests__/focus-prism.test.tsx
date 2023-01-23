@@ -102,25 +102,17 @@ it('should work with promise based atoms with "undefined" value', async () => {
   const customerBaseAtom = atom<CustomerData | undefined>(undefined)
 
   const asyncCustomerDataAtom = atom(
-    async (get) => Promise.resolve(get(customerBaseAtom)),
-    async (_, set, nextValue: Promise<CustomerData | undefined>) => {
-      set(customerBaseAtom, (await nextValue) || undefined)
+    async (get) => get(customerBaseAtom),
+    (_, set, nextValue: CustomerData) => {
+      set(customerBaseAtom, nextValue)
     }
   )
 
-  const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) => {
-    return optic.optional()
-  })
-
-  const derivedPromiseAtom = focusAtom(focusedPromiseAtom, (optic) =>
+  const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) =>
     optic.optional()
   )
 
-  expectTypeOf(derivedPromiseAtom).toMatchTypeOf<
-    WritableAtom<
-      Promise<string | undefined> | undefined,
-      SetStateAction<Promise<CustomerData | undefined>>,
-      Promise<CustomerData | undefined>
-    >
+  expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
+    WritableAtom<Promise<string | undefined>, SetStateAction<CustomerData>>
   >
 })
