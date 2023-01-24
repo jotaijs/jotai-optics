@@ -57,3 +57,19 @@ it('typescript should accept "undefined" as valid value for traversals', async (
     return result
   })
 })
+
+it('should work with promise based atoms with "undefined" value', async () => {
+  const customerBaseAtom = atom<CustomerData[] | undefined>(undefined)
+
+  const asyncCustomerDataAtom = atom(
+    async (get) => get(customerBaseAtom),
+    (_, set, nextValue: CustomerData[]) => {
+      set(customerBaseAtom, nextValue)
+    }
+  )
+
+  focusAtom(asyncCustomerDataAtom, (optic) => {
+    const result = optic.elems()
+    return result
+  })
+})

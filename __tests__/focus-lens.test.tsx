@@ -1,8 +1,8 @@
 import React, { StrictMode, Suspense } from 'react'
 import { fireEvent, render } from '@testing-library/react'
 import { expectTypeOf } from 'expect-type'
-import { WritableAtom, atom, useAtom } from 'jotai'
-import type { SetStateAction } from 'jotai'
+import { atom, useAtom } from 'jotai'
+import type { SetStateAction, WritableAtom } from 'jotai'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
 
@@ -239,11 +239,32 @@ it('typescript should accept "undefined" as valid value for lens', async () => {
     const result = optic
       .valueOr({ someOtherData: '' } as unknown as CustomerData)
       .prop('someOtherData')
-
     return result
   })
 
   expectTypeOf(derivedLens).toMatchTypeOf<
     WritableAtom<string, SetStateAction<string>, void>
   >()
+})
+
+it('should work with promise based atoms with "undefined" value', async () => {
+  const customerBaseAtom = atom<CustomerData | undefined>(undefined)
+
+  const asyncCustomerDataAtom = atom(
+    async (get) => get(customerBaseAtom),
+    (_, set, nextValue: CustomerData) => {
+      set(customerBaseAtom, nextValue)
+    }
+  )
+
+  const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) => {
+    const result = optic
+      .valueOr({ someOtherData: '' } as unknown as CustomerData)
+      .prop('someOtherData')
+    return result
+  })
+
+  expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
+    WritableAtom<Promise<string>, SetStateAction<CustomerData>>
+  >
 })

@@ -1,7 +1,8 @@
 import React, { StrictMode } from 'react'
 import { fireEvent, render } from '@testing-library/react'
 import { expectTypeOf } from 'expect-type'
-import { SetStateAction, WritableAtom, atom, useAtom } from 'jotai'
+import { atom, useAtom } from 'jotai'
+import type { SetStateAction, WritableAtom } from 'jotai'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
 
