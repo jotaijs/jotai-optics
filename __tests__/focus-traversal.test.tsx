@@ -34,3 +34,26 @@ it('updates traversals', async () => {
   await findByText('count: 6,7')
   await findByText('bigAtom: [{"a":6},{},{"a":7}]')
 })
+
+type BillingData = {
+  id: string
+}
+
+type CustomerData = {
+  id: string
+  billing: BillingData[]
+  someOtherData: string
+}
+
+it('typescript should accept "undefined" as valid value for traversals', async () => {
+  const customerListListAtom = atom<CustomerData[][]>([])
+
+  const nonEmptyCustomerListAtom = focusAtom(customerListListAtom, (optic) =>
+    optic.find((el) => el.length > 0)
+  )
+
+  focusAtom(nonEmptyCustomerListAtom, (optic) => {
+    const result = optic.elems()
+    return result
+  })
+})
