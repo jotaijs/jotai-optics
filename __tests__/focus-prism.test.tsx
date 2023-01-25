@@ -114,6 +114,6 @@ it('should work with promise based atoms with "undefined" value', async () => {
   )
 
   expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
-    WritableAtom<Promise<string | undefined>, SetStateAction<CustomerData>>
-  >
+    WritableAtom<CustomerData | undefined, SetStateAction<CustomerData>, void>
+  >()
 })
