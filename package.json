@@ -3,6 +3,10 @@
   "description": "👻💎",
   "version": "0.2.0",
   "author": "merisbahti",
+  "contributors": [
+    "Daishi Kato (https://github.com/dai-shi)",
+    "Arjun Vegda (https://github.com/arjunvegda)"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jotai-labs/jotai-optics.git"
