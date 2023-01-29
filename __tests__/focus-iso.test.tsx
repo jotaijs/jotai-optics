@@ -37,7 +37,7 @@ it('typescript should accept "undefined" as valid value for iso', async () => {
   expectTypeOf(derivedIso).toMatchTypeOf<
     WritableAtom<
       BillingData[] | undefined,
-      SetStateAction<BillingData[] | undefined>,
+      [SetStateAction<BillingData[] | undefined>],
       void
     >
   >()
