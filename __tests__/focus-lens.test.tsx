@@ -1,7 +1,8 @@
 import React, { StrictMode, Suspense } from 'react'
 import { fireEvent, render } from '@testing-library/react'
+import { expectTypeOf } from 'expect-type'
 import { atom, useAtom } from 'jotai'
-import type { SetStateAction } from 'jotai'
+import type { SetStateAction, WritableAtom } from 'jotai'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
 
@@ -215,4 +216,55 @@ it('basic derivation using focus with scope works', async () => {
   fireEvent.click(getByText('incr'))
   await findByText('count: 1')
   await findByText('bigAtom: {"a":1}')
+})
+
+type BillingData = {
+  id: string
+}
+
+type CustomerData = {
+  id: string
+  billing: BillingData[]
+  someOtherData: string
+}
+
+it('typescript should accept "undefined" as valid value for lens', async () => {
+  const customerListAtom = atom<CustomerData[]>([])
+
+  const foundCustomerAtom = focusAtom(customerListAtom, (optic) =>
+    optic.find((el) => el.id === 'some-invalid-id')
+  )
+
+  const derivedLens = focusAtom(foundCustomerAtom, (optic) => {
+    const result = optic
+      .valueOr({ someOtherData: '' } as unknown as CustomerData)
+      .prop('someOtherData')
+    return result
+  })
+
+  expectTypeOf(derivedLens).toMatchTypeOf<
+    WritableAtom<string, SetStateAction<string>, void>
+  >()
+})
+
+it('should work with promise based atoms with "undefined" value', async () => {
+  const customerBaseAtom = atom<CustomerData | undefined>(undefined)
+
+  const asyncCustomerDataAtom = atom(
+    async (get) => get(customerBaseAtom),
+    (_, set, nextValue: CustomerData) => {
+      set(customerBaseAtom, nextValue)
+    }
+  )
+
+  const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) => {
+    const result = optic
+      .valueOr({ someOtherData: '' } as unknown as CustomerData)
+      .prop('someOtherData')
+    return result
+  })
+
+  expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
+    WritableAtom<string, SetStateAction<string>, void>
+  >()
 })

@@ -1,6 +1,8 @@
 import React, { StrictMode } from 'react'
 import { fireEvent, render } from '@testing-library/react'
+import { expectTypeOf } from 'expect-type'
 import { atom, useAtom } from 'jotai'
+import type { SetStateAction, WritableAtom } from 'jotai'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
 
@@ -64,4 +66,54 @@ it('atoms that focus on no values are not updated', async () => {
   fireEvent.click(getByText('button'))
   await findByText('count:')
   await findByText('bigAtom: {}')
+})
+
+type BillingData = {
+  id: string
+}
+
+type CustomerData = {
+  id: string
+  billing: BillingData[]
+  someDynamicData?: string
+}
+
+it('typescript should work well with nested arrays containing optional values', async () => {
+  const customerListAtom = atom<CustomerData[]>([])
+
+  const foundCustomerAtom = focusAtom(customerListAtom, (optic) =>
+    optic.find((el) => el.id === 'some-invalid-id')
+  )
+
+  const derivedAtom = focusAtom(foundCustomerAtom, (optic) => {
+    const result = optic
+      .valueOr({ billing: [] } as unknown as CustomerData)
+      .prop('billing')
+      .find((el) => el.id === 'some-invalid-id')
+
+    return result
+  })
+
+  expectTypeOf(derivedAtom).toMatchTypeOf<
+    WritableAtom<BillingData | undefined, SetStateAction<BillingData>, void>
+  >()
+})
+
+it('should work with promise based atoms with "undefined" value', async () => {
+  const customerBaseAtom = atom<CustomerData | undefined>(undefined)
+
+  const asyncCustomerDataAtom = atom(
+    async (get) => get(customerBaseAtom),
+    (_, set, nextValue: CustomerData) => {
+      set(customerBaseAtom, nextValue)
+    }
+  )
+
+  const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) =>
+    optic.optional()
+  )
+
+  expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
+    WritableAtom<CustomerData | undefined, SetStateAction<CustomerData>, void>
+  >()
 })
