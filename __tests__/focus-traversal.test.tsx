@@ -4,7 +4,6 @@ import { expectTypeOf } from 'expect-type'
 import { atom, useAtom } from 'jotai'
 import type { SetStateAction, WritableAtom } from 'jotai'
 import * as O from 'optics-ts'
-import type { NotAnArrayType } from 'optics-ts/utils'
 import { focusAtom } from '../src/index'
 
 it('updates traversals', async () => {
@@ -56,16 +55,12 @@ it('typescript should accept "undefined" as valid value for traversals', async (
   )
 
   const focusedPromiseAtom = focusAtom(nonEmptyCustomerListAtom, (optic) => {
-    const result = optic.elems()
+    const result = optic.valueOr([] as CustomerData[]).elems()
     return result
   })
 
   expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
-    WritableAtom<
-      NotAnArrayType<CustomerData[] | undefined>[],
-      SetStateAction<NotAnArrayType<CustomerData[] | undefined>>,
-      void
-    >
+    WritableAtom<CustomerData[], SetStateAction<CustomerData>, void>
   >()
 })
 
@@ -80,15 +75,11 @@ it('should work with promise based atoms with "undefined" value', async () => {
   )
 
   const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) => {
-    const result = optic.elems()
+    const result = optic.valueOr([] as CustomerData[]).elems()
     return result
   })
 
   expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
-    WritableAtom<
-      NotAnArrayType<CustomerData[] | undefined>[],
-      SetStateAction<NotAnArrayType<CustomerData[] | undefined>>,
-      void
-    >
+    WritableAtom<CustomerData[], SetStateAction<CustomerData>, void>
   >()
 })
