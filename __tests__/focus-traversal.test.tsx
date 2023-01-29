@@ -55,7 +55,7 @@ it('typescript should accept "undefined" as valid value for traversals', async (
   )
 
   const focusedPromiseAtom = focusAtom(nonEmptyCustomerListAtom, (optic) => {
-    const result = optic.valueOr([] as CustomerData[]).elems()
+    const result = optic.valueOr([]).elems()
     return result
   })
 
@@ -75,7 +75,7 @@ it('should work with promise based atoms with "undefined" value', async () => {
   )
 
   const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) => {
-    const result = optic.valueOr([] as CustomerData[]).elems()
+    const result = optic.valueOr([]).elems()
     return result
   })
 
