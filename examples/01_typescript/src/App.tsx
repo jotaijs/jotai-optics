@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react'
 import { atom, useAtomValue, useSetAtom } from 'jotai'
 import type { PrimitiveAtom } from 'jotai'
-import { focusAtom } from 'jotai-optics'
 import { splitAtom } from 'jotai/utils'
+import { focusAtom } from 'jotai-optics'
 import { OpticFor } from 'optics-ts'
 
 // Use splitAtom and focusAtom to interactive with fast food price
