@@ -105,8 +105,8 @@ it('should work with promise based atoms with "undefined" value', async () => {
 
   const asyncCustomerDataAtom = atom(
     async (get) => get(customerBaseAtom),
-    (_, set, nextValue: CustomerData) => {
-      set(customerBaseAtom, nextValue)
+    async (_, set, nextValue: Promise<CustomerData>) => {
+      set(customerBaseAtom, await nextValue)
     }
   )
 
@@ -115,6 +115,10 @@ it('should work with promise based atoms with "undefined" value', async () => {
   )
 
   expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
-    WritableAtom<CustomerData | undefined, [SetStateAction<CustomerData>], void>
+    WritableAtom<
+      Promise<CustomerData | undefined>,
+      [SetStateAction<CustomerData>],
+      Promise<void>
+    >
   >()
 })
