@@ -1,5 +1,6 @@
 import { expectTypeOf } from 'expect-type'
-import { SetStateAction, WritableAtom, atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
+import type { SetStateAction, WritableAtom } from 'jotai/vanilla'
 import { focusAtom } from '../src'
 
 type BillingData = {
