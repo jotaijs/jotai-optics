@@ -1,5 +1,6 @@
 import { expectTypeOf } from 'expect-type'
-import { SetStateAction, WritableAtom, atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
+import type { SetStateAction, WritableAtom } from 'jotai/vanilla'
 import { focusAtom } from '../src'
 
 type BillingData = {
@@ -37,7 +38,7 @@ it('typescript should accept "undefined" as valid value for iso', async () => {
   expectTypeOf(derivedIso).toMatchTypeOf<
     WritableAtom<
       BillingData[] | undefined,
-      SetStateAction<BillingData[] | undefined>,
+      [SetStateAction<BillingData[] | undefined>],
       void
     >
   >()

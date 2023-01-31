@@ -1,8 +1,9 @@
 import React, { StrictMode } from 'react'
 import { fireEvent, render } from '@testing-library/react'
 import { expectTypeOf } from 'expect-type'
-import { atom, useAtom } from 'jotai'
-import type { SetStateAction, WritableAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
+import { atom } from 'jotai/vanilla'
+import type { SetStateAction, WritableAtom } from 'jotai/vanilla'
 import * as O from 'optics-ts'
 import { focusAtom } from '../src/index'
 
@@ -60,7 +61,7 @@ it('typescript should accept "undefined" as valid value for traversals', async (
   })
 
   expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
-    WritableAtom<CustomerData[], SetStateAction<CustomerData>, void>
+    WritableAtom<CustomerData[], [SetStateAction<CustomerData>], void>
   >()
 })
 
@@ -69,8 +70,8 @@ it('should work with promise based atoms with "undefined" value', async () => {
 
   const asyncCustomerDataAtom = atom(
     async (get) => get(customerBaseAtom),
-    (_, set, nextValue: CustomerData[]) => {
-      set(customerBaseAtom, nextValue)
+    async (_, set, nextValue: Promise<CustomerData[]>) => {
+      set(customerBaseAtom, await nextValue)
     }
   )
 
@@ -80,6 +81,10 @@ it('should work with promise based atoms with "undefined" value', async () => {
   })
 
   expectTypeOf(focusedPromiseAtom).toMatchTypeOf<
-    WritableAtom<CustomerData[], SetStateAction<CustomerData>, void>
+    WritableAtom<
+      Promise<CustomerData[]>,
+      [SetStateAction<CustomerData>],
+      Promise<void>
+    >
   >()
 })

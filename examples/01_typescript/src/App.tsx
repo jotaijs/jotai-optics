@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react'
-import { atom, useAtomValue, useSetAtom } from 'jotai'
-import type { PrimitiveAtom } from 'jotai'
-import { splitAtom } from 'jotai/utils'
+import { useAtomValue, useSetAtom } from 'jotai/react'
+import { atom } from 'jotai/vanilla'
+import type { PrimitiveAtom } from 'jotai/vanilla'
+import { splitAtom } from 'jotai/vanilla/utils'
 import { focusAtom } from 'jotai-optics'
 import { OpticFor } from 'optics-ts'
 
