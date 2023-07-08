@@ -9,7 +9,7 @@ import { focusAtom } from '../src/index'
 
 it('updates traversals', async () => {
   const bigAtom = atom<{ a?: number }[]>([{ a: 5 }, {}, { a: 6 }])
-  const focusFunction = (optic: O.OpticFor<{ a?: number }[]>) =>
+  const focusFunction = (optic: O.OpticFor_<{ a?: number }[]>) =>
     optic.elems().prop('a').optional()
 
   const Counter = () => {

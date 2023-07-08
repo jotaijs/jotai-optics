@@ -11,7 +11,7 @@ const succ = (input: number) => input + 1
 
 it('basic derivation using focus works', async () => {
   const bigAtom = atom({ a: 0 })
-  const focusFunction = (optic: O.OpticFor<{ a: number }>) => optic.prop('a')
+  const focusFunction = (optic: O.OpticFor_<{ a: number }>) => optic.prop('a')
 
   const Counter = () => {
     const [count, setCount] = useAtom(focusAtom(bigAtom, focusFunction))
@@ -50,7 +50,7 @@ it('basic derivation using focus works', async () => {
 
 it('focus on an atom works', async () => {
   const bigAtom = atom({ a: 0 })
-  const focusFunction = (optic: O.OpticFor<{ a: number }>) => optic.prop('a')
+  const focusFunction = (optic: O.OpticFor_<{ a: number }>) => optic.prop('a')
 
   const Counter = () => {
     const [count, setCount] = useAtom(focusAtom(bigAtom, focusFunction))
@@ -139,7 +139,7 @@ it('focus on async atom works', async () => {
       set(baseAtom, next)
     }
   )
-  const focusFunction = (optic: O.OpticFor<{ count: number }>) =>
+  const focusFunction = (optic: O.OpticFor_<{ count: number }>) =>
     optic.prop('count')
 
   const Counter = () => {
