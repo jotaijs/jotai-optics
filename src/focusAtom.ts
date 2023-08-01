@@ -19,18 +19,18 @@ type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
-  callback: (optic: O.OpticFor<S>) => O.Prism<S, any, A>
+  callback: (optic: O.OpticFor_<S>) => O.Prism<S, any, A>
 ): WritableAtom<Promise<A | undefined>, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
-  callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>
+  callback: (optic: O.OpticFor_<S>) => O.Traversal<S, any, A>
 ): WritableAtom<Promise<A[]>, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
   callback: (
-    optic: O.OpticFor<S>
+    optic: O.OpticFor_<S>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
 ): WritableAtom<Promise<A>, [SetStateAction<A>], R>
 
@@ -38,18 +38,18 @@ export function focusAtom<S, A, R>(
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
-  callback: (optic: O.OpticFor<S | undefined>) => O.Prism<S, any, A>
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Prism<S, any, A>
 ): WritableAtom<Promise<A | undefined>, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
-  callback: (optic: O.OpticFor<S | undefined>) => O.Traversal<S, any, A>
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Traversal<S, any, A>
 ): WritableAtom<Promise<A[]>, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
   callback: (
-    optic: O.OpticFor<S | undefined>
+    optic: O.OpticFor_<S | undefined>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
 ): WritableAtom<Promise<A>, [SetStateAction<A>], R>
 
@@ -57,18 +57,18 @@ export function focusAtom<S, A, R>(
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S, [NonFunction<S>], R>,
-  callback: (optic: O.OpticFor<S>) => O.Prism<S, any, A>
+  callback: (optic: O.OpticFor_<S>) => O.Prism<S, any, A>
 ): WritableAtom<A | undefined, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S, [NonFunction<S>], R>,
-  callback: (optic: O.OpticFor<S>) => O.Traversal<S, any, A>
+  callback: (optic: O.OpticFor_<S>) => O.Traversal<S, any, A>
 ): WritableAtom<A[], [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S, [NonFunction<S>], R>,
   callback: (
-    optic: O.OpticFor<S>
+    optic: O.OpticFor_<S>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
 ): WritableAtom<A, [SetStateAction<A>], R>
 
@@ -76,18 +76,18 @@ export function focusAtom<S, A, R>(
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
-  callback: (optic: O.OpticFor<S | undefined>) => O.Prism<S, any, A>
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Prism<S, any, A>
 ): WritableAtom<A | undefined, [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
-  callback: (optic: O.OpticFor<S | undefined>) => O.Traversal<S, any, A>
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Traversal<S, any, A>
 ): WritableAtom<A[], [SetStateAction<A>], R>
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
   callback: (
-    optic: O.OpticFor<S | undefined>
+    optic: O.OpticFor_<S | undefined>
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>
 ): WritableAtom<A, [SetStateAction<A>], R>
 
@@ -96,7 +96,7 @@ export function focusAtom<S, A, R>(
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S, [NonFunction<S>], R>,
   callback: (
-    optic: O.OpticFor<S>
+    optic: O.OpticFor_<S>
   ) =>
     | O.Lens<S, any, A>
     | O.Equivalence<S, any, A>

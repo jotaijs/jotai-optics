@@ -4,7 +4,7 @@ import { atom } from 'jotai/vanilla'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { splitAtom } from 'jotai/vanilla/utils'
 import { focusAtom } from 'jotai-optics'
-import { OpticFor } from 'optics-ts'
+import { OpticFor_ } from 'optics-ts'
 
 // Use splitAtom and focusAtom to interactive with fast food price
 const basicFoodList = [
@@ -50,7 +50,7 @@ const useFocusAtom = (anAtom: PrimitiveAtom<Food>) => {
   return useSetAtom(
     focusAtom(
       anAtom,
-      useCallback((optic: OpticFor<Food>) => optic.prop('amount'), [])
+      useCallback((optic: OpticFor_<Food>) => optic.prop('amount'), [])
     )
   )
 }
