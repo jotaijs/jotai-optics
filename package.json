@@ -19,8 +19,8 @@
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/src/index.d.ts",
-      "module": "./dist/index.modern.mjs",
       "import": "./dist/index.modern.mjs",
+      "module": "./dist/index.modern.js",
       "default": "./dist/index.umd.js"
     }
   },
