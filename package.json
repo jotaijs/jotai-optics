@@ -20,7 +20,6 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "import": "./dist/index.modern.mjs",
-      "module": "./dist/index.modern.js",
       "default": "./dist/index.umd.js"
     }
   },
