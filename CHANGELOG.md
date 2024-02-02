@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.3.2] - 2024-02-02
+
+### Changed
+
+- Remove "module" condition #13
+
 ## [0.3.1] - 2023-01-31
 
 ### Added
