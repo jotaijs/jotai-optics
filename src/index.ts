@@ -1,1 +1,1 @@
-export { focusAtom } from './focusAtom'
+export { focusAtom } from './focusAtom.js';

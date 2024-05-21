@@ -1,10 +1,10 @@
-import React, { useCallback } from 'react'
-import { useAtomValue, useSetAtom } from 'jotai/react'
-import { atom } from 'jotai/vanilla'
-import type { PrimitiveAtom } from 'jotai/vanilla'
-import { splitAtom } from 'jotai/vanilla/utils'
-import { focusAtom } from 'jotai-optics'
-import { OpticFor_ } from 'optics-ts'
+import { useCallback } from 'react';
+import { useAtomValue, useSetAtom } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
+import type { PrimitiveAtom } from 'jotai/vanilla';
+import { splitAtom } from 'jotai/vanilla/utils';
+import { focusAtom } from 'jotai-optics';
+import type { OpticFor_ } from 'optics-ts';
 
 // Use splitAtom and focusAtom to interactive with fast food price
 const basicFoodList = [
@@ -29,17 +29,17 @@ const basicFoodList = [
     price: 4.79,
     labels: ['appetizer', 'diet'],
   },
-]
+];
 
 interface Food {
-  id: number
-  name: string
-  amount: string
-  price: number
-  labels: string[]
+  id: number;
+  name: string;
+  amount: string;
+  price: number;
+  labels: string[];
 }
 
-const basicFoodListAtom = atom(basicFoodList)
+const basicFoodListAtom = atom(basicFoodList);
 
 const useFocusAtom = (anAtom: PrimitiveAtom<Food>) => {
   /* 
@@ -50,32 +50,34 @@ const useFocusAtom = (anAtom: PrimitiveAtom<Food>) => {
   return useSetAtom(
     focusAtom(
       anAtom,
-      useCallback((optic: OpticFor_<Food>) => optic.prop('amount'), [])
-    )
-  )
-}
+      useCallback((optic: OpticFor_<Food>) => optic.prop('amount'), []),
+    ),
+  );
+};
 
 const ItemDetail = ({ foodAtom }: { foodAtom: PrimitiveAtom<Food> }) => {
-  const food: Food = useAtomValue(foodAtom)
-  const setAmount = useFocusAtom(foodAtom)
+  const food: Food = useAtomValue(foodAtom);
+  const setAmount = useFocusAtom(foodAtom);
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(event?.target.value)
-  }
+    setAmount(event?.target.value);
+  };
 
   return (
     <div
       className="
       w-60 transition bg-gray-600 
       hover:bg-gray-700 max-w-sm rounded 
-      overflow-hidden shadow-lg m-5">
+      overflow-hidden shadow-lg m-5"
+    >
       <div className="px-6 py-1 md:py-2">
         <div className="font-bold text-xl capitalize mb-2">{food.name}</div>
         <h3
           className="
           w-full font-bold text-xl text-base inline-block bg-gray-200 rounded-full
           text-sm font-semibold text-gray-600
-          ">
+          "
+        >
           price: ${food.price}
         </h3>
       </div>
@@ -97,34 +99,34 @@ const ItemDetail = ({ foodAtom }: { foodAtom: PrimitiveAtom<Food> }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const ItemList = ({
   foodListAtom,
 }: {
-  foodListAtom: PrimitiveAtom<Food[]>
+  foodListAtom: PrimitiveAtom<Food[]>;
 }) => {
   /* 
     use splitAtom instead of split to single object
     inorder to track the atom values
   */
-  const foodListAtomAtoms = splitAtom(foodListAtom)
-  const foodListAtoms = useAtomValue(foodListAtomAtoms)
+  const foodListAtomAtoms = splitAtom(foodListAtom);
+  const foodListAtoms = useAtomValue(foodListAtomAtoms);
 
   return (
     <div className="flex place-content-center">
       {foodListAtoms.map((foodAtom, id) => {
         /* pass atom as argument to keep tracking values */
-        return <ItemDetail key={id} foodAtom={foodAtom} />
+        return <ItemDetail key={id} foodAtom={foodAtom} />;
       })}
     </div>
-  )
-}
+  );
+};
 
 const Summary = ({ foodListAtom }: { foodListAtom: PrimitiveAtom<Food[]> }) => {
-  const initialValue = 0
-  const foodList: Array<Food> = useAtomValue(foodListAtom)
+  const initialValue = 0;
+  const foodList: Array<Food> = useAtomValue(foodListAtom);
 
   return (
     <div className="h-52 lg:h-40 sm:h-60 bg-gray-300 text-gray-700 flex-initial mx-3 rounded">
@@ -134,7 +136,7 @@ const Summary = ({ foodListAtom }: { foodListAtom: PrimitiveAtom<Food[]> }) => {
           <strong>Total Price</strong> :
           {foodList
             .reduce((total, cur) => {
-              return total + parseInt(cur.amount, 10) * cur.price
+              return total + parseInt(cur.amount, 10) * cur.price;
             }, initialValue)
             .toFixed(2)}
         </p>
@@ -143,17 +145,18 @@ const Summary = ({ foodListAtom }: { foodListAtom: PrimitiveAtom<Food[]> }) => {
             return (
               <p
                 key={food.id}
-                className="bg-gray-700 text-zinc-200 flex-1 inline-block rounded-tr-md rounded-bl-md lg:rounded-full md:h-10 md:py-2 mx-2">
+                className="bg-gray-700 text-zinc-200 flex-1 inline-block rounded-tr-md rounded-bl-md lg:rounded-full md:h-10 md:py-2 mx-2"
+              >
                 <strong>{food.name}</strong> : $
                 {(parseInt(food.amount, 10) * food.price).toFixed(2)}
               </p>
-            )
+            );
           })}
         </ul>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function App() {
   return (
@@ -161,5 +164,5 @@ export default function App() {
       <ItemList foodListAtom={basicFoodListAtom} />
       <Summary foodListAtom={basicFoodListAtom} />
     </div>
-  )
+  );
 }
