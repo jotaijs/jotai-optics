@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Module-first setup #16
+
 ## [0.3.2] - 2024-02-02
 
 ### Changed
