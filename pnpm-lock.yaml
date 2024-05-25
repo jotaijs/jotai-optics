@@ -57,7 +57,7 @@ devDependencies:
     specifier: ^2.8.0
     version: 2.8.0(@types/react@18.3.2)(react@18.3.1)
   jotai-optics:
-    specifier: 'link:'
+    specifier: link:.
     version: 'link:'
   optics-ts:
     specifier: ^2.4.1
