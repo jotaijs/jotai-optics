@@ -17,6 +17,14 @@ const isFunction = <T>(x: T): x is T & ((...args: any[]) => any) =>
 
 type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T;
 
+type LensLike<S, A> =
+  | O.Lens<S, any, A>
+  | O.Equivalence<S, any, A>
+  | O.Iso<S, any, A>
+  | O.Prism<S, any, A>
+  | O.Traversal<S, any, A>
+  | O.Setter<S, any, A>;
+
 // Pattern 1: Promise
 
 export function focusAtom<S, A, R>(
@@ -35,6 +43,11 @@ export function focusAtom<S, A, R>(
     optic: O.OpticFor_<S>,
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>,
 ): WritableAtom<Promise<A>, [SetStateAction<A>], R>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.Setter<S, any, A>,
+): WritableAtom<Promise<void>, [NonFunction<A>], R>;
 
 // Pattern 2: Promise with undefined type
 
@@ -55,6 +68,11 @@ export function focusAtom<S, A, R>(
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>,
 ): WritableAtom<Promise<A>, [SetStateAction<A>], R>;
 
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Setter<S, any, A>,
+): WritableAtom<Promise<void>, [NonFunction<A>], R>;
+
 // Pattern 3: Default
 
 export function focusAtom<S, A, R>(
@@ -73,6 +91,11 @@ export function focusAtom<S, A, R>(
     optic: O.OpticFor_<S>,
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>,
 ): WritableAtom<A, [SetStateAction<A>], R>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.Setter<S, any, A>,
+): WritableAtom<void, [NonFunction<A>], R>;
 
 // Pattern 4: Default with undefined type
 
@@ -93,18 +116,16 @@ export function focusAtom<S, A, R>(
   ) => O.Lens<S, any, A> | O.Equivalence<S, any, A> | O.Iso<S, any, A>,
 ): WritableAtom<A, [SetStateAction<A>], R>;
 
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Setter<S, any, A>,
+): WritableAtom<void, [NonFunction<A>], R>;
+
 // Implementation
 
 export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S, [NonFunction<S>], R>,
-  callback: (
-    optic: O.OpticFor_<S>,
-  ) =>
-    | O.Lens<S, any, A>
-    | O.Equivalence<S, any, A>
-    | O.Iso<S, any, A>
-    | O.Prism<S, any, A>
-    | O.Traversal<S, any, A>,
+  callback: (optic: O.OpticFor_<S>) => LensLike<S, A>,
 ) {
   return memo2(
     () => {
@@ -118,7 +139,9 @@ export function focusAtom<S, A, R>(
         },
         (get, set, update: SetStateAction<A>) => {
           const newValueProducer = isFunction(update)
-            ? O.modify(focus)(update)
+            ? O.modify(focus as Exclude<LensLike<S, A>, O.Setter<S, any, A>>)(
+                update,
+              )
             : O.set(focus)(update);
           const base = get(baseAtom);
           return set(
@@ -136,15 +159,7 @@ export function focusAtom<S, A, R>(
   );
 }
 
-const getValueUsingOptic = <S, A>(
-  focus:
-    | O.Lens<S, any, A>
-    | O.Equivalence<S, any, A>
-    | O.Iso<S, any, A>
-    | O.Prism<S, any, A>
-    | O.Traversal<S, any, A>,
-  bigValue: S,
-) => {
+const getValueUsingOptic = <S, A>(focus: LensLike<S, A>, bigValue: S) => {
   if (focus._tag === 'Traversal') {
     const values = O.collect(focus)(bigValue);
     return values;
@@ -152,6 +167,9 @@ const getValueUsingOptic = <S, A>(
   if (focus._tag === 'Prism') {
     const value = O.preview(focus)(bigValue);
     return value;
+  }
+  if (focus._tag === 'Setter') {
+    return undefined;
   }
   const value = O.get(focus)(bigValue);
   return value;
