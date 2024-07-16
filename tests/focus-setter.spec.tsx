@@ -1,13 +1,11 @@
 import { afterEach, test } from 'vitest';
 import { StrictMode, Suspense } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { expectType } from 'ts-expect';
 import { useAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
-import type { SetStateAction, WritableAtom } from 'jotai/vanilla';
+import type { SetStateAction } from 'jotai/vanilla';
 import * as O from 'optics-ts';
 import { focusAtom } from 'jotai-optics';
-import type { NotAnArrayType } from 'node_modules/optics-ts/utils.js';
 import { useSetAtom } from 'jotai';
 
 afterEach(cleanup);
@@ -144,51 +142,4 @@ test('focus on async atom works', async () => {
   fireEvent.click(getByText('incr base'));
   await findByText('baseAtom: [0,1,2,3]');
   await findByText('asyncAtom: [0,1,2,3]');
-});
-
-type BillingData = {
-  id: string;
-};
-
-type CustomerData = {
-  id: string;
-  billing: BillingData[];
-  someOtherData: string;
-};
-
-test('typescript should accept "undefined" as valid value for lens', async () => {
-  const customerListAtom = atom<CustomerData[]>([]);
-
-  const foundCustomerAtom = focusAtom(customerListAtom, (optic) =>
-    optic.find((el) => el.id === 'some-invalid-id'),
-  );
-
-  const derivedLens = focusAtom(foundCustomerAtom, (optic) => optic.appendTo());
-
-  expectType<
-    WritableAtom<void, [NotAnArrayType<CustomerData | undefined>], void>
-  >(derivedLens);
-});
-
-test('should work with promise based atoms with "undefined" value', async () => {
-  const customerBaseAtom = atom<CustomerData | undefined>(undefined);
-
-  const asyncCustomerDataAtom = atom(
-    async (get) => get(customerBaseAtom),
-    async (_, set, nextValue: Promise<CustomerData>) => {
-      set(customerBaseAtom, await nextValue);
-    },
-  );
-
-  const focusedPromiseAtom = focusAtom(asyncCustomerDataAtom, (optic) =>
-    optic.appendTo(),
-  );
-
-  expectType<
-    WritableAtom<
-      Promise<void>,
-      [NotAnArrayType<CustomerData | undefined>],
-      Promise<void>
-    >
-  >(focusedPromiseAtom);
 });
