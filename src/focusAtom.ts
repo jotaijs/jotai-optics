@@ -27,7 +27,11 @@ type ModifiableLensLike<S, A> =
 
 type SettableLensLike<S, A> = ModifiableLensLike<S, A> | O.Setter<S, any, A>;
 
-type LensLike<S, A> = SettableLensLike<S, A> | O.Getter<S, A>;
+type LensLike<S, A> =
+  | SettableLensLike<S, A>
+  | O.Getter<S, A>
+  | O.AffineFold<S, A>
+  | O.Fold<S, A>;
 
 // Pattern 1: Promise
 
@@ -58,6 +62,16 @@ export function focusAtom<S, A, R>(
   callback: (optic: O.OpticFor_<S>) => O.Getter<S, A>,
 ): Atom<Promise<A>>;
 
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.AffineFold<S, A>,
+): Atom<Promise<A | undefined>>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.Fold<S, A>,
+): Atom<Promise<A[]>>;
+
 // Pattern 2: Promise with undefined type
 
 export function focusAtom<S, A, R>(
@@ -86,6 +100,16 @@ export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
   callback: (optic: O.OpticFor_<S | undefined>) => O.Getter<S, A>,
 ): Atom<Promise<A>>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.AffineFold<S, A>,
+): Atom<Promise<A | undefined>>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Fold<S, A>,
+): Atom<Promise<A[]>>;
 
 // Pattern 3: Default
 
@@ -116,6 +140,16 @@ export function focusAtom<S, A, R>(
   callback: (optic: O.OpticFor_<S>) => O.Getter<S, A>,
 ): Atom<A>;
 
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.AffineFold<S, A>,
+): Atom<A | undefined>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.Fold<S, A>,
+): Atom<A[]>;
+
 // Pattern 4: Default with undefined type
 
 export function focusAtom<S, A, R>(
@@ -144,6 +178,16 @@ export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
   callback: (optic: O.OpticFor_<S | undefined>) => O.Getter<S, A>,
 ): Atom<A>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.AffineFold<S, A>,
+): Atom<A | undefined>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Fold<S, A>,
+): Atom<A[]>;
 
 // Implementation
 
@@ -182,11 +226,11 @@ export function focusAtom<S, A, R>(
 }
 
 const getValueUsingOptic = <S, A>(focus: LensLike<S, A>, bigValue: S) => {
-  if (focus._tag === 'Traversal') {
+  if (focus._tag === 'Traversal' || focus._tag === 'Fold') {
     const values = O.collect(focus)(bigValue);
     return values;
   }
-  if (focus._tag === 'Prism') {
+  if (focus._tag === 'Prism' || focus._tag === 'AffineFold') {
     const value = O.preview(focus)(bigValue);
     return value;
   }
