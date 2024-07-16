@@ -1,12 +1,11 @@
 import { afterEach, test } from 'vitest';
 import { StrictMode, Suspense } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { useAtom } from 'jotai/react';
+import { useAtom, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
 import type { SetStateAction } from 'jotai/vanilla';
 import * as O from 'optics-ts';
 import { focusAtom } from 'jotai-optics';
-import { useSetAtom } from 'jotai';
 
 afterEach(cleanup);
 
