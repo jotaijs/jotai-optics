@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Atom } from 'jotai';
 import { atom } from 'jotai/vanilla';
-import type { SetStateAction, WritableAtom } from 'jotai/vanilla';
+import type { Atom, SetStateAction, WritableAtom } from 'jotai/vanilla';
 import * as O from 'optics-ts';
 
 const getCached = <T>(c: () => T, m: WeakMap<object, T>, k: object): T =>
