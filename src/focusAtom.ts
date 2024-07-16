@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { Atom } from 'jotai';
 import { atom } from 'jotai/vanilla';
 import type { SetStateAction, WritableAtom } from 'jotai/vanilla';
 import * as O from 'optics-ts';
@@ -17,13 +18,16 @@ const isFunction = <T>(x: T): x is T & ((...args: any[]) => any) =>
 
 type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T;
 
-type LensLike<S, A> =
+type ModifiableLensLike<S, A> =
   | O.Lens<S, any, A>
   | O.Equivalence<S, any, A>
   | O.Iso<S, any, A>
   | O.Prism<S, any, A>
-  | O.Traversal<S, any, A>
-  | O.Setter<S, any, A>;
+  | O.Traversal<S, any, A>;
+
+type SettableLensLike<S, A> = ModifiableLensLike<S, A> | O.Setter<S, any, A>;
+
+type LensLike<S, A> = SettableLensLike<S, A> | O.Getter<S, A>;
 
 // Pattern 1: Promise
 
@@ -49,6 +53,11 @@ export function focusAtom<S, A, R>(
   callback: (optic: O.OpticFor_<S>) => O.Setter<S, any, A>,
 ): WritableAtom<Promise<void>, [NonFunction<A>], R>;
 
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.Getter<S, A>,
+): Atom<Promise<A>>;
+
 // Pattern 2: Promise with undefined type
 
 export function focusAtom<S, A, R>(
@@ -72,6 +81,11 @@ export function focusAtom<S, A, R>(
   baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
   callback: (optic: O.OpticFor_<S | undefined>) => O.Setter<S, any, A>,
 ): WritableAtom<Promise<void>, [NonFunction<A>], R>;
+
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<Promise<S | undefined>, [Promise<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Getter<S, A>,
+): Atom<Promise<A>>;
 
 // Pattern 3: Default
 
@@ -97,6 +111,11 @@ export function focusAtom<S, A, R>(
   callback: (optic: O.OpticFor_<S>) => O.Setter<S, any, A>,
 ): WritableAtom<void, [NonFunction<A>], R>;
 
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S>) => O.Getter<S, A>,
+): Atom<A>;
+
 // Pattern 4: Default with undefined type
 
 export function focusAtom<S, A, R>(
@@ -121,6 +140,11 @@ export function focusAtom<S, A, R>(
   callback: (optic: O.OpticFor_<S | undefined>) => O.Setter<S, any, A>,
 ): WritableAtom<void, [NonFunction<A>], R>;
 
+export function focusAtom<S, A, R>(
+  baseAtom: WritableAtom<S | undefined, [NonFunction<S>], R>,
+  callback: (optic: O.OpticFor_<S | undefined>) => O.Getter<S, A>,
+): Atom<A>;
+
 // Implementation
 
 export function focusAtom<S, A, R>(
@@ -139,10 +163,8 @@ export function focusAtom<S, A, R>(
         },
         (get, set, update: SetStateAction<A>) => {
           const newValueProducer = isFunction(update)
-            ? O.modify(focus as Exclude<LensLike<S, A>, O.Setter<S, any, A>>)(
-                update,
-              )
-            : O.set(focus)(update);
+            ? O.modify(focus as ModifiableLensLike<S, A>)(update)
+            : O.set(focus as SettableLensLike<S, A>)(update);
           const base = get(baseAtom);
           return set(
             baseAtom,
