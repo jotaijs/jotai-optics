@@ -12,7 +12,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "jotai-optics": ["./src/index.js"]
+      "jotai-optics": ["./src/index.ts"]
     }
   },
   "exclude": ["dist", "examples"]
