@@ -1,12 +1,17 @@
 import { afterEach, test } from 'vitest';
 import { StrictMode, Suspense } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
+import { userEvent as userEventOrig } from '@testing-library/user-event';
 import { expectType } from 'ts-expect';
 import { useAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
 import type { SetStateAction, WritableAtom } from 'jotai/vanilla';
 import * as O from 'optics-ts';
 import { focusAtom } from 'jotai-optics';
+
+const userEvent = {
+  click: (element: Element) => act(() => userEventOrig.click(element)),
+};
 
 const succ = (input: number) => input + 1;
 
@@ -29,26 +34,26 @@ test('basic derivation using focus works', async () => {
     );
   };
 
-  const { getByText, findByText } = render(
+  render(
     <StrictMode>
       <Counter />
     </StrictMode>,
   );
 
-  await findByText('count: 0');
-  await findByText('bigAtom: {"a":0}');
+  await screen.findByText('count: 0');
+  await screen.findByText('bigAtom: {"a":0}');
 
-  fireEvent.click(getByText('incr'));
-  await findByText('count: 1');
-  await findByText('bigAtom: {"a":1}');
+  await userEvent.click(screen.getByText('incr'));
+  await screen.findByText('count: 1');
+  await screen.findByText('bigAtom: {"a":1}');
 
-  fireEvent.click(getByText('incr'));
-  await findByText('count: 2');
-  await findByText('bigAtom: {"a":2}');
+  await userEvent.click(screen.getByText('incr'));
+  await screen.findByText('count: 2');
+  await screen.findByText('bigAtom: {"a":2}');
 
-  fireEvent.click(getByText('set zero'));
-  await findByText('count: 0');
-  await findByText('bigAtom: {"a":0}');
+  await userEvent.click(screen.getByText('set zero'));
+  await screen.findByText('count: 0');
+  await screen.findByText('bigAtom: {"a":0}');
 });
 
 test('focus on an atom works', async () => {
@@ -67,18 +72,18 @@ test('focus on an atom works', async () => {
     );
   };
 
-  const { getByText, findByText } = render(
+  render(
     <StrictMode>
       <Counter />
     </StrictMode>,
   );
 
-  await findByText('count: 0');
-  await findByText('bigAtom: {"a":0}');
+  await screen.findByText('count: 0');
+  await screen.findByText('bigAtom: {"a":0}');
 
-  fireEvent.click(getByText('button'));
-  await findByText('count: 1');
-  await findByText('bigAtom: {"a":1}');
+  await userEvent.click(screen.getByText('button'));
+  await screen.findByText('count: 1');
+  await screen.findByText('bigAtom: {"a":1}');
 });
 
 test('double-focus on an atom works', async () => {
@@ -106,30 +111,30 @@ test('double-focus on an atom works', async () => {
     );
   };
 
-  const { getByText, findByText } = render(
+  render(
     <StrictMode>
       <Counter />
     </StrictMode>,
   );
 
-  await findByText('bigAtom: {"a":{"b":0}}');
-  await findByText('atomA: {"b":0}');
-  await findByText('atomB: 0');
+  await screen.findByText('bigAtom: {"a":{"b":0}}');
+  await screen.findByText('atomA: {"b":0}');
+  await screen.findByText('atomB: 0');
 
-  fireEvent.click(getByText('inc bigAtom'));
-  await findByText('bigAtom: {"a":{"b":1}}');
-  await findByText('atomA: {"b":1}');
-  await findByText('atomB: 1');
+  await userEvent.click(screen.getByText('inc bigAtom'));
+  await screen.findByText('bigAtom: {"a":{"b":1}}');
+  await screen.findByText('atomA: {"b":1}');
+  await screen.findByText('atomB: 1');
 
-  fireEvent.click(getByText('inc atomA'));
-  await findByText('bigAtom: {"a":{"b":3}}');
-  await findByText('atomA: {"b":3}');
-  await findByText('atomB: 3');
+  await userEvent.click(screen.getByText('inc atomA'));
+  await screen.findByText('bigAtom: {"a":{"b":3}}');
+  await screen.findByText('atomA: {"b":3}');
+  await screen.findByText('atomB: 3');
 
-  fireEvent.click(getByText('inc atomB'));
-  await findByText('bigAtom: {"a":{"b":6}}');
-  await findByText('atomA: {"b":6}');
-  await findByText('atomB: 6');
+  await userEvent.click(screen.getByText('inc atomB'));
+  await screen.findByText('bigAtom: {"a":{"b":6}}');
+  await screen.findByText('atomA: {"b":6}');
+  await screen.findByText('atomB: 6');
 });
 
 test('focus on async atom works', async () => {
@@ -169,32 +174,34 @@ test('focus on async atom works', async () => {
     );
   };
 
-  const { getByText, findByText } = render(
-    <StrictMode>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Counter />
-      </Suspense>
-    </StrictMode>,
-  );
+  await act(async () => {
+    render(
+      <StrictMode>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Counter />
+        </Suspense>
+      </StrictMode>,
+    );
+  });
 
-  await findByText('baseAtom: 0');
-  await findByText('asyncAtom: 0');
-  await findByText('count: 0');
+  await screen.findByText('baseAtom: 0');
+  await screen.findByText('asyncAtom: 0');
+  await screen.findByText('count: 0');
 
-  fireEvent.click(getByText('incr count'));
-  await findByText('baseAtom: 1');
-  await findByText('asyncAtom: 1');
-  await findByText('count: 1');
+  await userEvent.click(screen.getByText('incr count'));
+  await screen.findByText('baseAtom: 1');
+  await screen.findByText('asyncAtom: 1');
+  await screen.findByText('count: 1');
 
-  fireEvent.click(getByText('incr async'));
-  await findByText('baseAtom: 2');
-  await findByText('asyncAtom: 2');
-  await findByText('count: 2');
+  await userEvent.click(screen.getByText('incr async'));
+  await screen.findByText('baseAtom: 2');
+  await screen.findByText('asyncAtom: 2');
+  await screen.findByText('count: 2');
 
-  fireEvent.click(getByText('incr base'));
-  await findByText('baseAtom: 3');
-  await findByText('asyncAtom: 3');
-  await findByText('count: 3');
+  await userEvent.click(screen.getByText('incr base'));
+  await screen.findByText('baseAtom: 3');
+  await screen.findByText('asyncAtom: 3');
+  await screen.findByText('count: 3');
 });
 
 type BillingData = {

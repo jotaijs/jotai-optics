@@ -1,6 +1,6 @@
 import { afterEach, test } from 'vitest';
 import { StrictMode } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { expectType } from 'ts-expect';
 import { useAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
@@ -27,18 +27,18 @@ test('updates traversals', async () => {
     );
   };
 
-  const { getByText, findByText } = render(
+  render(
     <StrictMode>
       <Counter />
     </StrictMode>,
   );
 
-  await findByText('count: 5,6');
-  await findByText('bigAtom: [{"a":5},{},{"a":6}]');
+  await screen.findByText('count: 5,6');
+  await screen.findByText('bigAtom: [{"a":5},{},{"a":6}]');
 
-  fireEvent.click(getByText('button'));
-  await findByText('count: 6,7');
-  await findByText('bigAtom: [{"a":6},{},{"a":7}]');
+  fireEvent.click(screen.getByText('button'));
+  await screen.findByText('count: 6,7');
+  await screen.findByText('bigAtom: [{"a":6},{},{"a":7}]');
 });
 
 type BillingData = {
